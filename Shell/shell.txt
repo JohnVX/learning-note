@@ -1,0 +1,15 @@
+
+# tcpflow 使用例子
+tcpflow -cp 'port 80 and src host x.x.x.x or dst host y.y.y.y and !port 63501'
+
+# iptables 使用例子
+#只允许特定 IP 访问特定端口
+service iptables start
+iptables -I INPUT 1 -p tcp --dport 51903:51905 -j DROP
+iptables -I INPUT 1 -p tcp --dport 51903:51905 -s x.x.x.x/24 -j ACCEPT
+service iptables save
+# 删除第一条规则
+iptables -D INPUT 1
+iptables -D OUTPUT 1
+# 列出含行号的规则
+iptables -nL --line-number

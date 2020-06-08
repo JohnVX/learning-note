@@ -3,7 +3,7 @@
  */
 public class KMP {
     public static void main(String[] args) {
-        match("abababdcabababcababc", "abababc");
+        match("aabababdcabababcababc", "abababc");
     }
     public static void match(String string, String pattern){
         int[] T = new int[pattern.length()];
@@ -16,9 +16,9 @@ public class KMP {
             }else if(T[index] == 0){
                 index = 0;
             }else if(T[index] < 0){
-              pos++;
+                pos++;
             } else {
-                index = index - T[index];
+                index = T[index];
             }
         }
         if(index >= pattern.length()){

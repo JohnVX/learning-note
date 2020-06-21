@@ -21,9 +21,6 @@ public class BTree<T>{
     public BTree(int order){
         this.order = order;
     }
-    private boolean isRoot(BTreeNode node) {
-        return node == root;
-    }
     /**
      * 在 root 这颗树上查找 key 所在(或所应在)的 B 树节点
      */
@@ -34,7 +31,6 @@ public class BTree<T>{
      * @param root 树的根节点
      * @param key  记录的 key
      * @return key 对应记录所在(或所应在)的 B 树节点
-     * @implSpec 在节点内使用二分查找的方法查找 key
      */
     private BTreeNode<T> locate(BTreeNode<T> root, int key) {
         if (root.firstEntry == null || root.firstEntry.leftChild == null)
@@ -127,5 +123,9 @@ public class BTree<T>{
                 entryNum++;
         }
         return entryNum;
+    }
+
+    public void deleteEntryByKey(int key){
+
     }
 }

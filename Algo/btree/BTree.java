@@ -126,6 +126,71 @@ public class BTree<T>{
     }
 
     public void deleteEntryByKey(int key){
+        BTreeNode<T> node = locateNodeByKey(key);
+        BTreeNode.Entry<T> entry = locateEntryInNodeByKey(node, key);
+        if(entry == null){
+            System.out.println("deleteEntryByKey failed: entry contain key:" + key + " doesn't exist.");
+            return;
+        }
+        if(node.firstEntry == null){
+            deleteEntryFromLeaf(node, entry);
+        }else {
+            deleteEntryFromInternal(node, entry);
+        }
+    }
+    private BTreeNode.Entry<T> locateEntryInNodeByKey(BTreeNode<T> node, int key){
+        if(node == null || node.firstEntry == null)
+            return null;
+        BTreeNode.Entry<T> entry = node.firstEntry;
+        while (entry != null && entry.key != key)
+            entry = entry.nextEntry;
+        return entry;
+    }
+    private void deleteEntryFromLeaf(BTreeNode<T> node, BTreeNode.Entry<T> entry){
+        if(node.firstEntry == entry){
+            node.firstEntry = entry.nextEntry;
+        }else {
+            BTreeNode.Entry<T> entry0 = node.firstEntry;
+            BTreeNode.Entry<T> preEntry = entry0;
+            while (entry0 != null && entry0 != entry) {
+                preEntry = entry0;
+                entry0 = entry0.nextEntry;
+            }
+            if(entry0 == null){
+                System.out.println("deleteEntryFromLeaf failed: 调用此方法前必须确保 entry 在 node 内。entry:" + entry + " node:" + node);
+            }else
+                preEntry.nextEntry = entry0.nextEntry;
+        }
+        if(getEntryNum(node) < (order-1)/2)
+            rebalancingAfterDeleteEntryFromLeaf(node);
+    }
+    private void deleteEntryFromInternal(BTreeNode<T> node, BTreeNode.Entry<T> entry){
+        //找到 entry 左子树中 key 最大值的 entry
+        BTreeNode.Entry<T> entry0 = entry.leftChild.firstEntry;
+        BTreeNode.Entry<T> targetEntry = entry0;
+        BTreeNode<T> targetNode = entry.leftChild;
+        while (true) {
+            while (entry0 != null) {
+                targetEntry = entry0;
+                entry0 = entry0.nextEntry;
+            }
+            if(targetEntry.leftChild == null)
+                break;
+            else {
+                entry0 = targetEntry.rightChild.firstEntry;
+                targetNode = targetEntry.rightChild;
+            }
+        }
+        entry.key = targetEntry.key;
+        entry.value = targetEntry.value;
+        deleteEntryFromLeaf(targetNode, targetEntry);
+    }
+
+    /**
+     * Rebalancing starts from a leaf and proceeds toward the root until the tree is balanced
+     * @param leafNode 叶子节点
+     */
+    private void rebalancingAfterDeleteEntryFromLeaf(BTreeNode<T> leafNode){
 
     }
 }

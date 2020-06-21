@@ -15,15 +15,15 @@ package btree;
  *
  */
 public class BTree<T>{
+    //B 树的阶, 即节点允许的最多子树数目
+    private int order;
     private BTreeNode<T> root = new BTreeNode<>(null);
-    private static boolean isRoot(BTreeNode node) {
-        return node.parent == null;
+    public BTree(int order){
+        this.order = order;
     }
-    private static boolean isLeaf(BTreeNode node) {
-        BTreeNode.Entry entry = node.firstEntry;
-        return entry == null || entry.leftChild == null;
+    private boolean isRoot(BTreeNode node) {
+        return node == root;
     }
-
     /**
      * 在 root 这颗树上查找 key 所在(或所应在)的 B 树节点
      */
@@ -34,50 +34,30 @@ public class BTree<T>{
      * @param root 树的根节点
      * @param key  记录的 key
      * @return key 对应记录所在(或所应在)的 B 树节点
+     * @implSpec 在节点内使用二分查找的方法查找 key
      */
     private BTreeNode<T> locate(BTreeNode<T> root, int key) {
-        if (isLeaf(root) || root.firstEntry.key == key)
+        if (root.firstEntry == null || root.firstEntry.leftChild == null)
             return root;
-        if (root.firstEntry.key > key)
-            return locate(root.firstEntry.leftChild, key);
         BTreeNode.Entry<T> entry = root.firstEntry;
         BTreeNode.Entry<T> preEntry = entry;
-        while ((entry = entry.nextEntry) != null) {
-            preEntry = entry;
-            if (entry.key == key)
-                return root;
+        while (entry != null) {
             if (entry.key > key)
                 return locate(entry.leftChild, key);
+            if (entry.key == key)
+                return root;
+            preEntry = entry;
+            entry = entry.nextEntry;
         }
         return locate(preEntry.rightChild, key);
     }
-
-    /**
-     * 往树 root 上插入一个记录
-     */
     public void insertEntry(BTreeNode.Entry<T> entry){
-        insertFromRoot(root, entry);
-    }
-    /**
-     * @param root  树的根节点
-     * @param entry 要插入的记录
-     */
-    private void insertFromRoot(BTreeNode<T> root, BTreeNode.Entry<T> entry) {
         BTreeNode<T> node = locate(root, entry.key);
-        insert0(node, entry);
+        insert(node, entry);
     }
-    private void insert0(BTreeNode<T> node, BTreeNode.Entry<T> entry){
-        int entryNum;
-        if (node.firstEntry == null)
-            entryNum = 0;
-        else {
-            BTreeNode.Entry entry0 = node.firstEntry;
-            //node 节点的记录数目
-            entryNum = 1;
-            while ((entry0 = entry0.nextEntry) != null)
-                entryNum++;
-        }
-        if (entryNum < (BTreeNode.order - 1))
+    private void insert(BTreeNode<T> node, BTreeNode.Entry<T> entry){
+        int entryNum = getEntryNum(node);
+        if (entryNum < (order - 1))
             insertWithoutSplit(node, entry);
         else insertWithSplit(node, entry);
     }
@@ -89,7 +69,7 @@ public class BTree<T>{
         if (entry.key < node.firstEntry.key) {
             entry.nextEntry = node.firstEntry;
             node.firstEntry = entry;
-            entry.rightChild = entry.nextEntry.leftChild;
+            entry.nextEntry.leftChild = entry.rightChild;
             return;
         }
         BTreeNode.Entry<T> entry0 = node.firstEntry;
@@ -110,14 +90,10 @@ public class BTree<T>{
     }
     private void insertWithSplit(BTreeNode<T> node, BTreeNode.Entry<T> entry) {
         insertWithoutSplit(node, entry);
-        BTreeNode.Entry<T> entry0 = node.firstEntry;
-        //node 节点的记录数目
-        int entryNum = 1;
-        while ((entry0 = entry0.nextEntry) != null)
-            entryNum++;
+        int entryNum = getEntryNum(node);
         BTreeNode<T> leftNode = new BTreeNode<>(null);
         leftNode.firstEntry = node.firstEntry;
-        entry0 = node.firstEntry;
+        BTreeNode.Entry<T> entry0 = node.firstEntry;
         for (int i = 0; i < (entryNum / 2) - 1; i++) {
             entry0 = entry0.nextEntry;
         }
@@ -128,14 +104,28 @@ public class BTree<T>{
         entry0.nextEntry = null;
         medianEntry.leftChild = leftNode;
         medianEntry.rightChild = rightNode;
-        if (isRoot(node)) {
+        if (node == root) {
             root = new BTreeNode<>(null);
             root.firstEntry = medianEntry;
             leftNode.parent = rightNode.parent = root;
         } else {
             leftNode.parent = rightNode.parent = node.parent;
-            insert0(node.parent, medianEntry);
+            insert(node.parent, medianEntry);
         }
     }
-
+    /**
+     * node 节点的记录数目
+     */
+    private int getEntryNum(BTreeNode<T> node){
+        int entryNum;
+        if (node.firstEntry == null)
+            entryNum = 0;
+        else {
+            BTreeNode.Entry entry0 = node.firstEntry;
+            entryNum = 1;
+            while ((entry0 = entry0.nextEntry) != null)
+                entryNum++;
+        }
+        return entryNum;
+    }
 }

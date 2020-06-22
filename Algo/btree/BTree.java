@@ -162,7 +162,7 @@ public class BTree<T>{
                 preEntry.nextEntry = entry0.nextEntry;
         }
         if(getEntryNum(node) < (order-1)/2)
-            rebalancingAfterDeleteEntryFromLeaf(node);
+            rebalancingAfterDeleteEntry(node);
     }
     private void deleteEntryFromInternal(BTreeNode<T> node, BTreeNode.Entry<T> entry){
         //找到 entry 左子树中 key 最大值的 entry
@@ -186,11 +186,37 @@ public class BTree<T>{
         deleteEntryFromLeaf(targetNode, targetEntry);
     }
 
-    /**
-     * Rebalancing starts from a leaf and proceeds toward the root until the tree is balanced
-     * @param leafNode 叶子节点
-     */
-    private void rebalancingAfterDeleteEntryFromLeaf(BTreeNode<T> leafNode){
-
+    private void rebalancingAfterDeleteEntry(BTreeNode<T> node){
+        BTreeNode.Entry<T> entry = node.parent.firstEntry;
+        while (entry != null && entry.leftChild != node)
+            entry = entry.nextEntry;
+        if(entry != null && getEntryNum(entry.rightChild) > (order-1)/2){
+            ////rotate left
+            return;
+        }
+        entry = node.parent.firstEntry;
+        while (entry != null && entry.rightChild != node)
+            entry = entry.nextEntry;
+        if(entry != null && getEntryNum(entry.leftChild) > (order-1)/2){
+            //rotate right
+            return;
+        }
+        //merge
+        entry = node.parent.firstEntry;
+        BTreeNode.Entry<T> preEntry = entry;
+        while (entry.leftChild != node && entry.rightChild != node) {
+            preEntry = entry;
+            entry = entry.nextEntry;
+        }
+        BTreeNode.Entry<T> entry0 = entry.leftChild.firstEntry;
+        while (entry0.nextEntry != null)
+            entry0 = entry0.nextEntry;
+        entry0.nextEntry = new BTreeNode.Entry<>(entry.key, entry.value);
+        entry0.nextEntry.leftChild = entry0.rightChild;
+        entry0.nextEntry.nextEntry = entry.rightChild.firstEntry;
+        entry.rightChild = null;
+        entry.nextEntry.leftChild = entry.leftChild;
+        preEntry.nextEntry = entry.nextEntry;
+        //entry0.nextEntry.rightChild = ;
     }
 }

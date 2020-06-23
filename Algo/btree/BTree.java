@@ -135,7 +135,7 @@ public class BTree<T>{
         if(node.firstEntry == null){
             deleteEntryFromLeaf(node, entry);
         }else {
-            deleteEntryFromInternal(node, entry);
+            deleteEntryFromInternal(entry);
         }
     }
     private BTreeNode.Entry<T> locateEntryInNodeByKey(BTreeNode<T> node, int key){
@@ -164,7 +164,7 @@ public class BTree<T>{
         if(getEntryNum(node) < (order-1)/2)
             rebalancingAfterDeleteEntry(node);
     }
-    private void deleteEntryFromInternal(BTreeNode<T> node, BTreeNode.Entry<T> entry){
+    private void deleteEntryFromInternal(BTreeNode.Entry<T> entry){
         //找到 entry 左子树中 key 最大值的 entry
         BTreeNode.Entry<T> entry0 = entry.leftChild.firstEntry;
         BTreeNode.Entry<T> targetEntry = entry0;
@@ -191,7 +191,14 @@ public class BTree<T>{
         while (entry != null && entry.leftChild != node)
             entry = entry.nextEntry;
         if(entry != null && getEntryNum(entry.rightChild) > (order-1)/2){
-            ////rotate left
+            //rotate left
+            BTreeNode.Entry<T> entry0 = node.firstEntry;
+            while (entry0.nextEntry != null)
+                entry0 = entry0.nextEntry;
+            entry0.nextEntry = new BTreeNode.Entry<>(entry.key, entry.value);
+            entry.key = entry.rightChild.firstEntry.key;
+            entry.value = entry.rightChild.firstEntry.value;
+            entry.rightChild.firstEntry = entry.rightChild.firstEntry.nextEntry;
             return;
         }
         entry = node.parent.firstEntry;
@@ -199,6 +206,15 @@ public class BTree<T>{
             entry = entry.nextEntry;
         if(entry != null && getEntryNum(entry.leftChild) > (order-1)/2){
             //rotate right
+            BTreeNode.Entry<T> entry0 = new BTreeNode.Entry<>(entry.key, entry.value);
+            entry0.nextEntry = node.firstEntry;
+            node.firstEntry = entry0;
+            BTreeNode.Entry<T> entry1 = entry.leftChild.firstEntry;
+            while (entry1.nextEntry.nextEntry != null)
+                entry1 = entry1.nextEntry;
+            entry.key = entry1.nextEntry.key;
+            entry.value = entry1.nextEntry.value;
+            entry1.nextEntry = null;
             return;
         }
         //merge

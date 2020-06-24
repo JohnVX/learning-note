@@ -13,3 +13,7 @@ iptables -D INPUT 1
 iptables -D OUTPUT 1
 # 列出含行号的规则
 iptables -nL --line-number
+
+#添加、删除网卡
+ifconfig lo up
+ifconfig lo down

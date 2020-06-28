@@ -1,5 +1,4 @@
-import btree.BTree;
-import btree.BTreeNode;
+package btree;
 
 public class RunBTree {
     public static void main(String[] args) {

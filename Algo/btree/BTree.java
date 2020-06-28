@@ -132,7 +132,7 @@ public class BTree<T>{
             System.out.println("deleteEntryByKey failed: entry contain key:" + key + " doesn't exist.");
             return;
         }
-        if(node.firstEntry == null){
+        if(node.firstEntry.leftChild == null){
             deleteEntryFromLeaf(node, entry);
         }else {
             deleteEntryFromInternal(entry);
@@ -186,6 +186,9 @@ public class BTree<T>{
         deleteEntryFromLeaf(targetNode, targetEntry);
     }
 
+    /**
+     * @param node 从 node 节点开始做平衡操作(可能会往树上层递归)
+     */
     private void rebalancingAfterDeleteEntry(BTreeNode<T> node){
         BTreeNode.Entry<T> entry = node.parent.firstEntry;
         while (entry != null && entry.leftChild != node)
@@ -196,6 +199,10 @@ public class BTree<T>{
             while (entry0.nextEntry != null)
                 entry0 = entry0.nextEntry;
             entry0.nextEntry = new BTreeNode.Entry<>(entry.key, entry.value);
+            if(entry0.rightChild != null){
+                entry0.nextEntry.leftChild = entry0.rightChild;
+                entry0.nextEntry.rightChild = entry.rightChild.firstEntry.leftChild;
+            }
             entry.key = entry.rightChild.firstEntry.key;
             entry.value = entry.rightChild.firstEntry.value;
             entry.rightChild.firstEntry = entry.rightChild.firstEntry.nextEntry;
@@ -206,14 +213,18 @@ public class BTree<T>{
             entry = entry.nextEntry;
         if(entry != null && getEntryNum(entry.leftChild) > (order-1)/2){
             //rotate right
-            BTreeNode.Entry<T> entry0 = new BTreeNode.Entry<>(entry.key, entry.value);
-            entry0.nextEntry = node.firstEntry;
-            node.firstEntry = entry0;
             BTreeNode.Entry<T> entry1 = entry.leftChild.firstEntry;
             while (entry1.nextEntry.nextEntry != null)
                 entry1 = entry1.nextEntry;
+            BTreeNode.Entry<T> entry0 = new BTreeNode.Entry<>(entry.key, entry.value);
+            entry0.nextEntry = node.firstEntry;
             entry.key = entry1.nextEntry.key;
             entry.value = entry1.nextEntry.value;
+            if(node.firstEntry.leftChild != null){
+                entry0.rightChild = node.firstEntry.leftChild;
+                entry0.leftChild = entry1.nextEntry.rightChild;
+            }
+            node.firstEntry = entry0;
             entry1.nextEntry = null;
             return;
         }
@@ -228,11 +239,28 @@ public class BTree<T>{
         while (entry0.nextEntry != null)
             entry0 = entry0.nextEntry;
         entry0.nextEntry = new BTreeNode.Entry<>(entry.key, entry.value);
-        entry0.nextEntry.leftChild = entry0.rightChild;
         entry0.nextEntry.nextEntry = entry.rightChild.firstEntry;
         entry.rightChild = null;
-        entry.nextEntry.leftChild = entry.leftChild;
-        preEntry.nextEntry = entry.nextEntry;
-        //entry0.nextEntry.rightChild = ;
+        if(entry0.rightChild != null){
+            entry0.nextEntry.leftChild = entry0.rightChild;
+            entry0.nextEntry.rightChild = entry0.nextEntry.nextEntry.leftChild;
+        }
+        if(entry.nextEntry != null) {
+            entry.nextEntry.leftChild = entry.leftChild;
+        }
+        if(entry == node.parent.firstEntry){
+            node.parent.firstEntry = entry.nextEntry;
+        }else {
+            preEntry.nextEntry = entry.nextEntry;
+        }
+        if(node.parent == root){
+            if(root.firstEntry == null) {
+                root = entry.leftChild;
+            }
+            return;
+        }
+        if(getEntryNum(node.parent) < (order-1)/2) {
+            rebalancingAfterDeleteEntry(node.parent);
+        }
     }
 }

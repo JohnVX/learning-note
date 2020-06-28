@@ -100,6 +100,10 @@ public class BTree<T>{
         entry0.nextEntry = null;
         medianEntry.leftChild = leftNode;
         medianEntry.rightChild = rightNode;
+        entry0 = leftNode.firstEntry;
+        setParent(entry0, leftNode);
+        entry0 = rightNode.firstEntry;
+        setParent(entry0, rightNode);
         if (node == root) {
             root = new BTreeNode<>(null);
             root.firstEntry = medianEntry;
@@ -107,6 +111,17 @@ public class BTree<T>{
         } else {
             leftNode.parent = rightNode.parent = node.parent;
             insert(node.parent, medianEntry);
+        }
+    }
+    private void setParent(BTreeNode.Entry<T> entry, BTreeNode<T> node){
+        if(entry.leftChild != null){
+            BTreeNode.Entry<T> preEntry = entry;
+            while(entry != null){
+                preEntry = entry;
+                entry.leftChild.parent = node;
+                entry = entry.nextEntry;
+            }
+            preEntry.rightChild.parent = node;
         }
     }
     /**
@@ -256,6 +271,7 @@ public class BTree<T>{
         if(node.parent == root){
             if(root.firstEntry == null) {
                 root = entry.leftChild;
+                root.parent = null;
             }
             return;
         }

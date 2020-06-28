@@ -20,8 +20,8 @@ public class RunBTree {
         btree.insertEntry(new BTreeNode.Entry<>(150, "150"));
         btree.insertEntry(new BTreeNode.Entry<>(160, "160"));
         btree.insertEntry(new BTreeNode.Entry<>(170, "170"));
-        //btree.deleteEntryByKey(10);
-        BTreeNode<String> node = btree.locateNodeByKey(10);
+        btree.deleteEntryByKey(90);
+        BTreeNode<String> node = btree.locateNodeByKey(40);
         System.out.println(node.toString());
     }
 }

@@ -1,3 +1,9 @@
 浏览器相关的工具
 Puppeteer:
 Puppeteer is a Node library which provides a high-level API to control headless Chrome or Chromium over the DevTools Protocol. It can also be configured to use full (non-headless) Chrome or Chromium.
+
+网络带宽控制
+tc
+
+网络带宽测量
+iperf3

@@ -4,6 +4,12 @@ Puppeteer is a Node library which provides a high-level API to control headless 
 
 网络带宽控制
 tc
+查看设置
+tc qdisc show dev eth0
+使用令牌桶方法限制网卡速率
+tc qdisc add dev eth0 root tbf rate 10mbit latency 70ms burst 100kb
 
 网络带宽测量
 iperf3
+iperf3 -s -1 -p {port}
+iperf3 -c {ip} -p {port}

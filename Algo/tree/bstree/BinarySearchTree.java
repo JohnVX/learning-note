@@ -1,14 +1,19 @@
 package bstree;
 
+import java.util.function.Consumer;
+
 /**
  * 一般的二叉查找树
  */
 public class BinarySearchTree<T> {
     private Node<T> root;
     private static boolean predecessorSuccessorButton = true;
-    private static class Node<T>{
+    public static class Node<T>{
         private int key;
         private T value;
+        public T getValue() {
+            return value;
+        }
         private Node<T> leftChild;
         private Node<T> rightChild;
         private Node(int key, T value){
@@ -167,5 +172,20 @@ public class BinarySearchTree<T> {
         }else {
             return "[empty tree]";
         }
+    }
+    public void traversal(Consumer<Node<T>> consumer){
+        if(root == null){
+            System.out.println("empty tree");
+            return;
+        }
+        traversal0(root, consumer);
+    }
+    private void traversal0(Node<T> node, Consumer<Node<T>> consumer){
+        if(node == null){
+            return;
+        }
+        traversal0(node.leftChild, consumer);
+        consumer.accept(node);
+        traversal0(node.rightChild, consumer);
     }
 }

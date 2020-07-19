@@ -3,6 +3,169 @@ package bstree;
 /**
  * 一般的二叉查找树
  */
-public class BinarySearchTree {
-
+public class BinarySearchTree<T> {
+    private Node<T> root;
+    private static boolean predecessorSuccessorButton = true;
+    private static class Node<T>{
+        private int key;
+        private T value;
+        private Node<T> leftChild;
+        private Node<T> rightChild;
+        private Node(int key, T value){
+            this.key = key;
+            this.value = value;
+            this.leftChild = this.rightChild = null;
+        }
+        private void replace(int key, T value){
+            this.key = key;
+            this.value = value;
+        }
+        @Override
+        public String toString(){
+            if(this.leftChild == null && this.rightChild == null){
+                return "[key=" + key + ", value=" + value + "]";
+            }else {
+                return "[key=" + key + ", value=" + value + ", leftChild=" + leftChild + ", rightChild=" + rightChild + "]";
+            }
+        }
+    }
+    public Node<T> lookup(int key){
+        Node<T> node = root;
+        while (node != null){
+            if(node.key == key){
+                return node;
+            }else if(node.key < key){
+                node = node.rightChild;
+            }else {
+                node = node.leftChild;
+            }
+        }
+        return null;
+    }
+    public void insert(int key, T value){
+        if(root == null){
+            root = new Node<>(key, value);
+            return;
+        }
+        Node<T> node = root;
+        while(true){
+            if(node.key == key){
+                System.out.println("不可插入重复数据, key=" + key + ", value=" + node.value + ", 本次计划插入的 value=" + value);
+                return;
+            }
+            if(node.key < key){
+                if(node.rightChild == null){
+                    node.rightChild = new Node<>(key, value);
+                    return;
+                }else {
+                    node = node.rightChild;
+                }
+            }else {
+                if(node.leftChild == null){
+                    node.leftChild = new Node<>(key, value);
+                    return;
+                }else {
+                    node = node.leftChild;
+                }
+            }
+        }
+    }
+    public void delete(int key){
+        Node<T> node = root;
+        Node<T> parentNode = null;
+        while (true){
+            if(node.key == key){
+                if(node.leftChild == null && node.rightChild == null){
+                    if(node == root){
+                        root = null;
+                        return;
+                    }
+                    if(parentNode.leftChild == node){
+                        parentNode.leftChild = null;
+                    }else {
+                        parentNode.rightChild = null;
+                    }
+                }else if(node.leftChild == null){
+                    if(node == root){
+                        root.replace(node.rightChild.key, node.rightChild.value);
+                        root.rightChild = null;
+                        return;
+                    }
+                    if(parentNode.leftChild == node){
+                        parentNode.leftChild = node.rightChild;
+                    }else {
+                        parentNode.rightChild = node.rightChild;
+                    }
+                }else if(node.rightChild == null){
+                    if(node == root){
+                        root.replace(node.leftChild.key, node.leftChild.value);
+                        root.leftChild = null;
+                        return;
+                    }
+                    if(parentNode.leftChild == node){
+                        parentNode.leftChild = node.leftChild;
+                    }else {
+                        parentNode.rightChild = node.leftChild;
+                    }
+                }else {
+                    Node<T> replaceNode;
+                    if(predecessorSuccessorButton){
+                        replaceNode = findPredecessorNode(node);
+                        predecessorSuccessorButton = false;
+                    }else {
+                        replaceNode = findSuccessorNode(node);
+                        predecessorSuccessorButton = true;
+                    }
+                    assert replaceNode != null;
+                    delete(replaceNode.key);
+                    node.replace(replaceNode.key, replaceNode.value);
+                }
+                return;
+            }
+            parentNode = node;
+            if(node.key < key){
+                node = node.rightChild;
+            }else {
+                node = node.leftChild;
+            }
+            if(node == null){
+                System.out.println("要删除的数据不存在, key=" + key);
+                return;
+            }
+        }
+    }
+    private Node<T> findPredecessorNode(Node<T> startNode){
+        if(startNode.leftChild == null){
+            System.out.println("此节点无前邻节点");
+            return null;
+        }
+        Node<T> node = startNode.leftChild;
+        Node<T> rightNode = node.rightChild;
+        while (rightNode != null){
+            node = rightNode;
+            rightNode = rightNode.rightChild;
+        }
+        return node;
+    }
+    private Node<T> findSuccessorNode(Node<T> startNode){
+        if(startNode.rightChild == null){
+            System.out.println("此节点无后继节点");
+            return null;
+        }
+        Node<T> node = startNode.rightChild;
+        Node<T> leftNode = node.leftChild;
+        while (leftNode != null){
+            node = leftNode;
+            leftNode = leftNode.leftChild;
+        }
+        return node;
+    }
+    @Override
+    public String toString(){
+        if(root != null){
+            return root.toString();
+        }else {
+            return "[empty tree]";
+        }
+    }
 }

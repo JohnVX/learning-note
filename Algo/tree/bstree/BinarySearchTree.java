@@ -92,8 +92,7 @@ public class BinarySearchTree<T> {
                     }
                 }else if(node.leftChild == null){
                     if(node == root){
-                        root.replace(node.rightChild.key, node.rightChild.value);
-                        root.rightChild = null;
+                        root = root.rightChild;
                         return;
                     }
                     if(parentNode.leftChild == node){
@@ -103,8 +102,7 @@ public class BinarySearchTree<T> {
                     }
                 }else if(node.rightChild == null){
                     if(node == root){
-                        root.replace(node.leftChild.key, node.leftChild.value);
-                        root.leftChild = null;
+                        root = root.leftChild;
                         return;
                     }
                     if(parentNode.leftChild == node){

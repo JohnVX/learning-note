@@ -14,9 +14,14 @@ public class RunBinarySearchTree {
         tree.insert(35, "35");
         tree.insert(45, "45");
         tree.insert(55, "55");
-        tree.delete(50);
-        //System.out.println(tree.lookup(40));
-        //System.out.println(tree.toString());
+        tree.delete(90);
+//        System.out.println(tree.lookup(40));
+//        System.out.println(tree.toString());
+//        tree.insert(50, "50");
+//        tree.insert(40, "40");
+//        tree.insert(30, "30");
+//        tree.insert(45, "45");
+//        tree.delete(40);
         tree.traversal((Node<String> node)-> System.out.print(node.getValue() + ", "));
     }
 }

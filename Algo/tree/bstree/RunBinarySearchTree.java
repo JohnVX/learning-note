@@ -15,6 +15,7 @@ public class RunBinarySearchTree {
         tree.insert(45, "45");
         tree.insert(55, "55");
         tree.delete(90);
+        tree.delete(50);
 //        System.out.println(tree.lookup(40));
 //        System.out.println(tree.toString());
 //        tree.insert(50, "50");

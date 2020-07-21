@@ -16,7 +16,7 @@ public class BinarySearchTree<T> {
         }
         private Node<T> leftChild;
         private Node<T> rightChild;
-        private Node(int key, T value){
+        protected Node(int key, T value){
             this.key = key;
             this.value = value;
             this.leftChild = this.rightChild = null;

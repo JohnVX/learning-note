@@ -1,8 +1,8 @@
-package btree;
+package tree.btree;
 
 public class RunBTree {
     public static void main(String[] args) {
-        BTree<String> btree = new BTree<>(5);
+        tree.btree.BTree<String> btree = new BTree<>(5);
         btree.insertEntry(new BTreeNode.Entry<>(10, "shuwei"));
         btree.insertEntry(new BTreeNode.Entry<>(20, "lili"));
         btree.insertEntry(new BTreeNode.Entry<>(30, "john"));

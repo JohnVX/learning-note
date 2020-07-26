@@ -1,4 +1,4 @@
-package bstree;
+package tree.bstree;
 
 import java.util.function.Consumer;
 

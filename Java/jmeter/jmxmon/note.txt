@@ -1,0 +1,4 @@
+用 jmeter 测试 java 类的应用:
+借助于 JMX 和 RMI 协议, jmeter 可以在运行时得到即时的被测 java 程序的内部数据,该份数据落地为文件,可用于绘图,方便后续的分析
+需要在 jmeter 中引入插件 JMXMon Sample Collector
+https://jmeter-plugins.org/wiki/JMXMon/

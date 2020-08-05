@@ -1,0 +1,13 @@
+设置自动提交事务
+sqlSessionFactory.openSession(true)
+
+建库
+CREATE DATABASE `my_test`
+
+建表
+CREATE TABLE `user` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_name` varchar(125) NOT NULL,
+  `hashed_password` varchar(32) NOT NULL,
+  PRIMARY KEY (`id`)
+)

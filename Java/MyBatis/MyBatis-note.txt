@@ -1,2 +1,0 @@
-设置自动提交事务
-sqlSessionFactory.openSession(true)

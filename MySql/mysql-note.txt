@@ -1,0 +1,32 @@
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'my-password';
+CREATE USER 'root'@'%' identified by 'my-password';
+GRANT ALL ON *.* to 'root'@'%' WITH GRANT OPTION;
+
+ALTER TABLE blog MODIFY COLUMN `create_time` DATETIME NOT NULL;
+INSERT INTO blog VALUES (1000000, 'mybatis tutorial', CURRENT_TIME());
+alter table blog modify column `id` int not null auto_increment;
+
+CREATE TABLE `blog` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(125) NOT NULL,
+  `create_time` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=10000
+
+create table `user`(
+`id` int not null auto_increment, 
+`user_name` varchar(125) not null, 
+`hashed_password` varchar(32) not null, 
+PRIMARY KEY (`id`)) auto_increment=10000;
+
+create table `user_city`(
+`id` int not null auto_increment,
+`user_id` int not null, 
+`city_id` int not null, 
+PRIMARY KEY (`id`), UNIQUE(`user_id`, `city_id`)) auto_increment=10000;
+
+create table `city`(
+`id` int not null auto_increment, 
+`city_name` varchar(125) not null,  
+PRIMARY KEY (`id`)) auto_increment=10000;
+

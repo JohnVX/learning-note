@@ -2,15 +2,6 @@
 Puppeteer:
 Puppeteer is a Node library which provides a high-level API to control headless Chrome or Chromium over the DevTools Protocol. It can also be configured to use full (non-headless) Chrome or Chromium.
 
-网络带宽控制
-tc
-查看设置
-tc qdisc show dev eth0
-同时设置带宽速率、丢包率、网络时延
-tc qdisc add dev eth0 handle 10: root tbf rate 0.5mbit burst 5kb latency 70ms peakrate 1mbit minburst 1540
-tc qdisc add dev eth0 parent 10:1 handle 100: netem loss 8%
-tc qdisc add dev eth0 parent 100:1 handle 1000: netem delay 100ms 20ms distribution normal
-
 网络带宽测量
 iperf3
 iperf3 -s -1 -p {port}

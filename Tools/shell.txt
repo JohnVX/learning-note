@@ -1,0 +1,37 @@
+
+# tcpflow 使用例子
+tcpflow -cp 'port 80 and src host x.x.x.x or dst host y.y.y.y and !port 63501'
+
+# iptables 使用例子
+#只允许特定 IP 访问特定端口
+service iptables start
+iptables -I INPUT 1 -p tcp --dport 51903:51905 -j DROP
+iptables -I INPUT 1 -p tcp --dport 51903:51905 -s x.x.x.x/24 -j ACCEPT
+service iptables save
+# 删除第一条规则
+iptables -D INPUT 1
+iptables -D OUTPUT 1
+# 列出含行号的规则
+iptables -nL --line-number
+
+#添加、删除网卡
+ifconfig lo up
+ifconfig lo down
+
+生成 1 百万个 1KB 大小的文件
+seq 1000000 | xargs -i dd if=/dev/zero of={}.dat bs=1024 count=1
+
+产生一个随机内容的指定大小的文件
+dd if=/dev/urandom of=/dev/null  bs=1MB  count=2
+
+dd if=/dev/urandom of=/tmp/tmp.data  bs=1MB  count=10240
+
+网络带宽控制
+tc
+查看设置
+tc qdisc show dev eth0
+同时设置带宽速率、丢包率、网络时延
+tc qdisc add dev eth0 handle 10: root tbf rate 0.5mbit burst 5kb latency 70ms peakrate 1mbit minburst 1540
+tc qdisc add dev eth0 parent 10:1 handle 100: netem loss 8%
+tc qdisc add dev eth0 parent 100:1 handle 1000: netem delay 100ms 20ms distribution normal
+

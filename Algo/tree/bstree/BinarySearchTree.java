@@ -11,12 +11,9 @@ public class BinarySearchTree<T> {
     public static class Node<T>{
         private int key;
         private T value;
-        public T getValue() {
-            return value;
-        }
         private Node<T> leftChild;
         private Node<T> rightChild;
-        protected Node(int key, T value){
+        Node(int key, T value){
             this.key = key;
             this.value = value;
             this.leftChild = this.rightChild = null;

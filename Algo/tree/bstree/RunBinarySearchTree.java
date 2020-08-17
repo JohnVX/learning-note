@@ -3,7 +3,7 @@ package tree.bstree;
 import static tree.bstree.BinarySearchTree.Node;
 public class RunBinarySearchTree {
     public static void main(String[] args) {
-        tree.bstree.BinarySearchTree<String> tree = new BinarySearchTree<>();
+        BinarySearchTree<String> tree = new BinarySearchTree<>();
         tree.insert(50, "50");
         tree.insert(30, "30");
         tree.insert(80, "80");

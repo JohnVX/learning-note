@@ -6,17 +6,20 @@ import java.util.function.Consumer;
  * 一般的二叉查找树
  */
 public class BinarySearchTree<T> {
-    private Node<T> root;
+    Node<T> root;
     private static boolean predecessorSuccessorButton = true;
     public static class Node<T>{
-        private int key;
-        private T value;
-        private Node<T> leftChild;
-        private Node<T> rightChild;
+        int key;
+        T value;
+        Node<T> leftChild;
+        Node<T> rightChild;
         Node(int key, T value){
             this.key = key;
             this.value = value;
             this.leftChild = this.rightChild = null;
+        }
+        public T getValue() {
+            return value;
         }
         private void replace(int key, T value){
             this.key = key;

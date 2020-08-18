@@ -68,12 +68,15 @@ public class AVLTree<T> extends BinarySearchTree<T> {
 
         if(node.balanceFactor == 2 && ((AVLNode)node.leftChild).balanceFactor == 1){
             left2(node);
+            return;
         }
         if(node.balanceFactor == -2 && ((AVLNode)node.rightChild).balanceFactor == -1){
             right2(node);
+            return;
         }
         if(node.balanceFactor == 2 && ((AVLNode)node.leftChild).balanceFactor == -1){
             leftRight(node);
+            return;
         }
         if(node.balanceFactor == -2 && ((AVLNode)node.rightChild).balanceFactor == 1){
             rightLeft(node);

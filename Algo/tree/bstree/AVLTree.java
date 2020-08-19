@@ -44,18 +44,25 @@ public class AVLTree<T> extends BinarySearchTree<T> {
                 }
             }
         }
+        //If the balance factor temporarily becomes ±2, this has to be repaired by an appropriate rotation after which the subtree has the same height as before
         AVLNode<T> rotateRoot = null;
         while(node != this.root){
             if (node.parent.leftChild == node) {
                 node.parent.balanceFactor++;
-                if(node.parent.balanceFactor > 1 && rotateRoot == null){
+                if(node.parent.balanceFactor > 1){
                     rotateRoot = node.parent;
+                    break;
                 }
             } else{
                 node.parent.balanceFactor--;
-                if(node.parent.balanceFactor < -1 && rotateRoot == null){
+                if(node.parent.balanceFactor < -1){
                     rotateRoot = node.parent;
+                    break;
                 }
+            }
+            //The retracing can stop if the balance factor becomes 0 implying that the height of that subtree remains unchanged.
+            if(node.parent.balanceFactor == 0){
+                break;
             }
             node = node.parent;
         }
@@ -67,11 +74,11 @@ public class AVLTree<T> extends BinarySearchTree<T> {
         assert node != null && (node.balanceFactor == -2 || node.balanceFactor == 2);
 
         if(node.balanceFactor == 2 && ((AVLNode)node.leftChild).balanceFactor == 1){
-            left2(node);
+            left(node);
             return;
         }
-        if(node.balanceFactor == -2 && ((AVLNode)node.rightChild).balanceFactor == -1){
-            right2(node);
+        if((node.balanceFactor == -2) && ((AVLNode)node.rightChild).balanceFactor == -1){
+            right(node);
             return;
         }
         if(node.balanceFactor == 2 && ((AVLNode)node.leftChild).balanceFactor == -1){
@@ -82,7 +89,7 @@ public class AVLTree<T> extends BinarySearchTree<T> {
             rightLeft(node);
         }
     }
-    private void left2(AVLNode<T> node){
+    private void left(AVLNode<T> node){
         AVLNode<T> parent = node.parent;
         AVLNode<T> pivot = (AVLNode<T>)node.leftChild;
 
@@ -104,7 +111,7 @@ public class AVLTree<T> extends BinarySearchTree<T> {
         pivot.rightChild = node;
         pivot.balanceFactor = node.balanceFactor = 0;
     }
-    private void right2(AVLNode<T> node){
+    private void right(AVLNode<T> node){
         AVLNode<T> parent = node.parent;
         AVLNode<T> pivot = (AVLNode<T>)node.rightChild;
 

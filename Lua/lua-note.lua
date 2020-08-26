@@ -202,4 +202,148 @@ local m = require("module")
 print(m.constant)
 m.func3()
 
+mytable = {}                          -- 普通表
+mymetatable = {}                      -- 元表
+print(setmetatable(mytable,mymetatable))     -- 把 mymetatable 设为 mytable 的元表
+print(getmetatable(mytable))
+
+mytable = setmetatable({key1 = "value1"}, {
+  __index = function(mytable, key)
+    if key == "key2" then
+      return "metatablevalue"
+    else
+      return nil
+    end
+  end
+})
+print(mytable.key1,mytable.key2)
+
+mytable = setmetatable({key1 = "value1"}, { __index = { key2 = "metatablevalue" } })
+print(mytable.key1,mytable.key2)
+
+function table_maxn(t)
+    local mn = 0
+    for k, v in pairs(t) do
+        if mn < k then
+            mn = k
+        end
+    end
+    return mn
+end
+-- 两表相加操作
+mytable = setmetatable({ 1, 2, 3 }, {
+  __add = function(mytable, newtable)
+    for i = 1, table_maxn(newtable) do
+      table.insert(mytable, table_maxn(mytable)+1,newtable[i])
+    end
+    return mytable
+  end
+})
+
+secondtable = {4,5,6}
+
+mytable = mytable + secondtable
+for k,v in ipairs(mytable) do
+    print(k,v)
+end
+
+mytable = setmetatable({ 10, 20, 30 }, {
+  __tostring = function(mytable)
+    sum = 0
+    for k, v in pairs(mytable) do
+                sum = sum + v
+    end
+    return "表所有元素的和为 " .. sum
+  end
+})
+print(mytable)
+
+print("coroutine")
+co = coroutine.create(
+    function(i)
+        print(i);
+    end
+) 
+coroutine.resume(co, 1)
+print(coroutine.status(co))
+
+co = coroutine.wrap(
+    function(i)
+        print(i);
+    end
+)
+co(1)
+
+co2 = coroutine.create(
+    function()
+        for i=1,10 do
+            print(i)
+            if i == 3 then
+                print(coroutine.status(co2))  --running
+                print(coroutine.running()) --thread:XXXXXX
+            end
+            coroutine.yield()
+        end
+    end
+)
+coroutine.resume(co2) --1
+coroutine.resume(co2) --2
+coroutine.resume(co2) --3
+print(coroutine.status(co2))   -- suspended
+print(coroutine.running())
+
+print("resume 处于主程中，它将外部状态(数据)传入到协同程序内部; 而 yield 则将内部的状态(数据)返回到主程中")
+function foo (a)
+    print("foo 函数输出", a)
+    return coroutine.yield(2 * a) -- 返回  2*a 的值
+end
+co = coroutine.create(function (a , b)
+    print("第一次协同程序执行输出", a, b) -- co-body 1 10
+    local r = foo(a + 1)
+     
+    print("第二次协同程序执行输出", r)
+    local r, s = coroutine.yield(a + b, a - b)  
+     
+    print("第三次协同程序执行输出", r, s)
+    return b, "结束协同程序"                   
+end)       
+print("main", coroutine.resume(co, 1, 10)) -- true, 4
+print("--分割线----")
+print("main", coroutine.resume(co, "r")) -- true 11 -9
+print("---分割线---")
+print("main", coroutine.resume(co, "x", "y")) -- true 10 end
+print("---分割线---")
+print("main", coroutine.resume(co, "x", "y")) -- cannot resume dead coroutine
+print("---分割线---")
+
+print("生产者-消费者")
+local newProductor
+function productor()
+     local i = 0
+     while true do
+          i = i + 1
+          send(i)     -- 将生产的物品发送给消费者
+     end
+end
+function consumer()
+     while true do
+          local i = receive()     -- 从生产者那里得到物品
+          print(i)
+          if i >= 6 then
+              break
+	  end
+     end
+end
+function receive()
+     local status, value = coroutine.resume(newProductor)
+     return value
+end
+function send(x)
+     coroutine.yield(x)     -- x表示需要发送的值，值返回以后，就挂起该协同程序
+end
+-- 启动程序
+newProductor = coroutine.create(productor)
+consumer()
+
+-- C API
 

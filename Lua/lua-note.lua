@@ -169,4 +169,37 @@ print("字符串 2 是",string2)
 string3 = [["Lua 教程"]]
 print("字符串 3 是",string3)
 
+function square(iteratorMaxCount,currentNumber)
+   if currentNumber<iteratorMaxCount
+   then
+      currentNumber = currentNumber+1
+   return currentNumber, currentNumber*currentNumber
+   end
+end
+
+for i,n in square,3,0
+do
+   print(i,n)
+end
+
+fruits = {"banana","orange","apple","grapes"}
+print("排序前")
+for k,v in ipairs(fruits) do
+        print(k,v)
+end
+
+table.sort(fruits)
+print("排序后")
+for k,v in ipairs(fruits) do
+        print(k,v)
+end
+
+require("module")
+print(module.constant)
+module.func3()
+
+local m = require("module")
+print(m.constant)
+m.func3()
+
 

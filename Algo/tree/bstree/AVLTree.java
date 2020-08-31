@@ -193,6 +193,67 @@ public class AVLTree<T> extends BinarySearchTree<T> {
     }
     @Override
     public void delete(int key){
+        AVLNode<T> node = deleteO(key);
 
+    }
+    private AVLNode<T> deleteO(int key){
+        AVLNode<T> node = (AVLNode<T>)root;
+        AVLNode<T> parentNode = null;
+        while (true){
+            if(node.key == key) {
+                if (node.leftChild == null && node.rightChild == null) {
+                    if (node == root) {
+                        root = null;
+                        return null;
+                    }
+                    if (parentNode.leftChild == node) {
+                        parentNode.leftChild = null;
+                    } else {
+                        parentNode.rightChild = null;
+                    }
+                } else if (node.leftChild == null) {
+                    if (node == root) {
+                        root = root.rightChild;
+                        ((AVLNode<T>)root).parent = null;
+                        return null;
+                    }
+                    if (parentNode.leftChild == node) {
+                        parentNode.leftChild = node.rightChild;
+                    } else {
+                        parentNode.rightChild = node.rightChild;
+
+                    }
+                    ((AVLNode<T>)node.rightChild).parent = parentNode;
+                } else if (node.rightChild == null) {
+                    if (node == root) {
+                        root = root.leftChild;
+                        ((AVLNode<T>)root).parent = null;
+                        return null;
+                    }
+                    if (parentNode.leftChild == node) {
+                        parentNode.leftChild = node.leftChild;
+                    } else {
+                        parentNode.rightChild = node.leftChild;
+                    }
+                    ((AVLNode<T>)node.leftChild).parent = parentNode;
+                } else {
+                    Node<T> replaceNode = findPredecessorNode(node);
+                    assert replaceNode != null;
+                    deleteO(replaceNode.key);
+                    node.replace(replaceNode.key, replaceNode.value);
+                }
+                return parentNode;
+            }
+            parentNode = node;
+            if(node.key < key){
+                node = (AVLNode<T>)node.rightChild;
+            }else{
+                node = (AVLNode<T>)node.leftChild;
+            }
+            if(node == null){
+                System.out.println("要删除的数据不存在, key=" + key);
+                return null;
+            }
+        }
     }
 }

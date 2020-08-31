@@ -21,7 +21,7 @@ public class BinarySearchTree<T> {
         public T getValue() {
             return value;
         }
-        private void replace(int key, T value){
+        void replace(int key, T value){
             this.key = key;
             this.value = value;
         }
@@ -137,7 +137,7 @@ public class BinarySearchTree<T> {
             }
         }
     }
-    private Node<T> findPredecessorNode(Node<T> startNode){
+    Node<T> findPredecessorNode(Node<T> startNode){
         if(startNode.leftChild == null){
             System.out.println("此节点无前邻节点");
             return null;
@@ -148,7 +148,7 @@ public class BinarySearchTree<T> {
             node = rightNode;
             rightNode = rightNode.rightChild;
         }
-        return node;
+        return new Node<>(node.key, node.value);
     }
     private Node<T> findSuccessorNode(Node<T> startNode){
         if(startNode.rightChild == null){

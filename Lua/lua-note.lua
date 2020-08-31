@@ -2,6 +2,8 @@
 
 print("Hello World!")
 
+print("Lua 语句无需加分号结尾、流程控制语句无需加大括号")
+
 -- comment
 print("单行注释 --")
 
@@ -345,5 +347,88 @@ end
 newProductor = coroutine.create(productor)
 consumer()
 
+-- 以只读方式打开文件
+file = io.open("lua-note.lua", "r")
+-- 设置默认输入文件
+io.input(file)
+-- 输出文件第一行
+print(io.read())
+-- 关闭打开的文件
+io.close(file)
+file = io.open("read.txt", "r")
+io.input(file)
+-- 读取一个数字并返回它
+print(io.read("*n"))
+print(io.read("*n"))
+-- 返回一个指定字符个数的字符串
+print(io.read(5))
+
+-- 以附加的方式打开只写文件
+file = io.open("test.txt", "a")
+-- 设置默认输出文件
+io.output(file)
+-- 在文件最后一行添加 Lua 注释
+io.write("-- test.txt 文件末尾注释\n")
+print("向文件写入缓冲中的所有数据")
+io.flush()
+io.close(file)
+-- 返回一个临时文件句柄，程序结束时自动删除
+file = io.tmpfile()
+print("检测obj是否一个可用的文件句柄")
+print(io.type(file))
+
+print("返回一个迭代函数,每次调用将获得文件中的一行内容,当到文件尾时，将返回nil")
+f = io.lines("read.txt")
+print(type(f))
+print(f())
+print(f())
+
+print("以一种面对对象的形式，将所有的文件操作定义为文件句柄的方法")
+file = io.open("read.txt", "r")
+print(file:read())
+file:close()
+file = io.open("test.txt", "a")
+file:write("--test end\n")
+file:close()
+
+file = io.open("read.txt", "r")
+print(file:seek())
+print(file:seek("end", -5))
+print(file:read(2))
+
+print("我们可以使用两个函数：assert 和 error 来处理错误")
+
+local function add(a,b)
+   assert(type(a) == "number", "a 不是一个数字")
+   assert(type(b) == "number", "b 不是一个数字")
+   return a+b
+end
+-- add(10)
+
+local function myError()
+    error("there is an error")
+end
+local function callMyError()
+    myError()
+end
+-- callMyError()
+
+print("使用函数 pcall(protected call) 来包装需要执行的代码")
+-- print(pcall(function(i) print(i) end, 33))
+-- print(pcall(function(i) print(i) error('error..') end, 33))
+print("debug.traceback：根据调用桟来构建一个扩展的错误消息")
+-- xpcall(function() print("inside xpacll") error('error..') end, function() print(debug.traceback()) end)
+function myFunction ()
+   n = n/nil
+end
+function myErrorHandler( err )
+   print( "ERROR:", err )
+end
+status = xpcall( myFunction, myErrorHandler )
+print(status)
+
 -- C API
+
+
+
 

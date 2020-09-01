@@ -1,4 +1,4 @@
-#!/usr/bin/lua
+#!/usr/local/bin/lua
 
 print("Hello World!")
 
@@ -368,7 +368,7 @@ file = io.open("test.txt", "a")
 -- 设置默认输出文件
 io.output(file)
 -- 在文件最后一行添加 Lua 注释
-io.write("-- test.txt 文件末尾注释\n")
+-- io.write("-- test.txt 文件末尾注释\n")
 print("向文件写入缓冲中的所有数据")
 io.flush()
 io.close(file)
@@ -388,7 +388,7 @@ file = io.open("read.txt", "r")
 print(file:read())
 file:close()
 file = io.open("test.txt", "a")
-file:write("--test end\n")
+-- file:write("--test end\n")
 file:close()
 
 file = io.open("read.txt", "r")
@@ -427,7 +427,78 @@ end
 status = xpcall( myFunction, myErrorHandler )
 print(status)
 
+print("Lua 中的面向对象机制")
+Shape = {area = 0}
+function Shape:new(obj,side)
+  obj = obj or {}
+  setmetatable(obj, self)
+  self.__index = self
+  side = side or 0
+  self.area = side*side;
+  return obj
+end
+
+function Shape:printArea ()
+  print("面积为 ",self.area)
+end
+
+myshape = Shape:new(nil,10)
+myshape:printArea()
+
+Square = Shape:new()
+function Square:new(obj,side)
+  obj = obj or Shape:new(obj,side)
+  setmetatable(obj, self)
+  self.__index = self
+  return obj
+end
+
+function Square:printArea()
+  print("正方形面积为 ", self.area)
+end
+
+mysquare = Square:new(nil,10)
+mysquare:printArea()
+
+Rectangle = Shape:new()
+function Rectangle:new (obj, length, breadth)
+  obj = obj or Shape:new(obj)
+  setmetatable(obj, self)
+  self.__index = self
+  self.area = length * breadth
+  return obj
+end
+
+function Rectangle:printArea ()
+  print("矩形面积为 ",self.area)
+end
+
+myrectangle = Rectangle:new(nil,10,20)
+myrectangle:printArea()
+
+print("先编译和安装 luasql, 获得动态链接库 mysql.so")
+luasql = require "luasql.mysql"
+print(type(luasql))
+print("创建环境对象 连接数据库 设置数据库的编码格式 执行数据库操作 文件对象的创建 关闭文件对象 关闭数据库连接 关闭数据库环境")
+env = luasql.mysql()
+conn = env:connect("my_test", "root", "Abc123#@!", "10.8.229.159", "63751") 
+print(env, conn)
+conn:execute("SET NAMES UTF8")
+cur = conn:execute("select id, user_name from user limit 10")
+row = cur:fetch({},"a")
+file = io.open("db.txt","w+")
+while row do
+    var = string.format("%d %s\n", row.id, row.user_name)
+    print(var)
+    file:write(var)
+    row = cur:fetch(row,"a")
+end
+file:close()
+conn:close()
+env:close()
+
 -- C API
+
 
 
 

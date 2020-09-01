@@ -481,7 +481,7 @@ luasql = require "luasql.mysql"
 print(type(luasql))
 print("创建环境对象 连接数据库 设置数据库的编码格式 执行数据库操作 文件对象的创建 关闭文件对象 关闭数据库连接 关闭数据库环境")
 env = luasql.mysql()
-conn = env:connect("my_test", "root", "Abc123#@!", "10.8.229.159", "63751") 
+conn = env:connect("dbname", "username", "passwd", "IP", "port") 
 print(env, conn)
 conn:execute("SET NAMES UTF8")
 cur = conn:execute("select id, user_name from user limit 10")

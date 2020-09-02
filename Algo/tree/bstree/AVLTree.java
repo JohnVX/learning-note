@@ -67,34 +67,157 @@ public class AVLTree<T> extends BinarySearchTree<T> {
             node = node.parent;
         }
         if(rotateRoot != null){
-            rotate(rotateRoot);
+            rotateForInsertion(rotateRoot);
         }
     }
-    private void rotate(AVLNode<T> node){
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void delete(int key){
+        AVLNode<T> node = deleteO(key);
+        if(node == null) return;
+        AVLNode<T> rotateRoot = null;
+        while (node != null){
+            if(node.balanceFactor < -1 || node.balanceFactor > 1){
+                rotateRoot = node;
+            }
+            if(node.balanceFactor != 0){
+                break;
+            }
+            if(node.parent != null) {
+                if (node.parent.leftChild == node) {
+                    node.parent.balanceFactor--;
+                } else {
+                    node.parent.balanceFactor++;
+                }
+            }
+            node = node.parent;
+        }
+        if(rotateRoot != null){
+            rotateForDeletion(rotateRoot);
+        }
+    }
+
+    /**
+     * @param key 要删除的节点的 key
+     * @return 被删除的节点的父节点
+     */
+    private AVLNode<T> deleteO(int key){
+        AVLNode<T> node = (AVLNode<T>)root;
+        AVLNode<T> parentNode = null;
+        while (true){
+            if(node.key == key) {
+                if (node.leftChild == null && node.rightChild == null) {
+                    if (node == root) {
+                        root = null;
+                        return null;
+                    }
+                    if (parentNode.leftChild == node) {
+                        parentNode.leftChild = null;
+                        parentNode.balanceFactor--;
+                    } else {
+                        parentNode.rightChild = null;
+                        parentNode.balanceFactor++;
+                    }
+                } else if (node.leftChild == null) {
+                    if (node == root) {
+                        root = root.rightChild;
+                        ((AVLNode<T>)root).parent = null;
+                        return null;
+                    }
+                    if (parentNode.leftChild == node) {
+                        parentNode.leftChild = node.rightChild;
+                        parentNode.balanceFactor--;
+                    } else {
+                        parentNode.rightChild = node.rightChild;
+                        parentNode.balanceFactor++;
+                    }
+                    ((AVLNode<T>)node.rightChild).parent = parentNode;
+                } else if (node.rightChild == null) {
+                    if (node == root) {
+                        root = root.leftChild;
+                        ((AVLNode<T>)root).parent = null;
+                        return null;
+                    }
+                    if (parentNode.leftChild == node) {
+                        parentNode.leftChild = node.leftChild;
+                        parentNode.balanceFactor--;
+                    } else {
+                        parentNode.rightChild = node.leftChild;
+                        parentNode.balanceFactor++;
+                    }
+                    ((AVLNode<T>)node.leftChild).parent = parentNode;
+                } else {
+                    //找前邻节点, 这一定是个叶子节点, delete0 的递归次数一定只有 1
+                    AVLNode<T> replaceNode = (AVLNode<T>)findPredecessorNode(node);
+                    assert replaceNode != null;
+                    parentNode = deleteO(replaceNode.key);
+                    node.replace(replaceNode.key, replaceNode.value);
+                    return parentNode;
+                }
+                return parentNode;
+            }
+            parentNode = node;
+            if(node.key < key){
+                node = (AVLNode<T>)node.rightChild;
+            }else{
+                node = (AVLNode<T>)node.leftChild;
+            }
+            if(node == null){
+                System.out.println("要删除的数据不存在, key=" + key);
+                return null;
+            }
+        }
+    }
+    private void rotateForInsertion(AVLNode<T> node){
         assert node != null && (node.balanceFactor == -2 || node.balanceFactor == 2);
 
         if(node.balanceFactor == 2 && ((AVLNode)node.leftChild).balanceFactor == 1){
-            left(node);
+            rightRotation(node);
             return;
         }
         if((node.balanceFactor == -2) && ((AVLNode)node.rightChild).balanceFactor == -1){
-            right(node);
+            leftRotation(node);
             return;
         }
         if(node.balanceFactor == 2 && ((AVLNode)node.leftChild).balanceFactor == -1){
-            leftRight(node);
+            leftRightRotation(node);
             return;
         }
         if(node.balanceFactor == -2 && ((AVLNode)node.rightChild).balanceFactor == 1){
-            rightLeft(node);
+            rightLeftRotation(node);
         }
     }
-    private void left(AVLNode<T> node){
+
+    /**
+     * 删除操作的旋转条件和插入操作的略有不同
+     * @param node 要旋转的根节点
+     */
+    private void rotateForDeletion(AVLNode<T> node){
+        assert node != null && (node.balanceFactor == -2 || node.balanceFactor == 2);
+
+        if(node.balanceFactor == 2){
+            int factor = ((AVLNode)node.leftChild).balanceFactor;
+            if(factor == 1 || factor == 0){
+                rightRotation(node);
+            }else if(factor == -1){
+                leftRightRotation(node);
+            }
+        }else{
+            int factor = ((AVLNode)node.rightChild).balanceFactor;
+            if(factor == -1 || factor == 0){
+                leftRotation(node);
+            }else if(factor == 1){
+                rightLeftRotation(node);
+            }
+        }
+    }
+    private void rightRotation(AVLNode<T> node){
         AVLNode<T> parent = node.parent;
         AVLNode<T> pivot = (AVLNode<T>)node.leftChild;
 
         if(node == root){
-           root = pivot;
+            root = pivot;
         }else {
             if(parent.leftChild == node){
                 parent.leftChild = pivot;
@@ -111,7 +234,7 @@ public class AVLTree<T> extends BinarySearchTree<T> {
         pivot.rightChild = node;
         pivot.balanceFactor = node.balanceFactor = 0;
     }
-    private void right(AVLNode<T> node){
+    private void leftRotation(AVLNode<T> node){
         AVLNode<T> parent = node.parent;
         AVLNode<T> pivot = (AVLNode<T>)node.rightChild;
 
@@ -133,7 +256,7 @@ public class AVLTree<T> extends BinarySearchTree<T> {
         pivot.leftChild = node;
         pivot.balanceFactor = node.balanceFactor = 0;
     }
-    private void leftRight(AVLNode<T> node){
+    private void leftRightRotation(AVLNode<T> node){
         AVLNode<T> parent = node.parent;
         AVLNode<T> leftNode = (AVLNode<T>)node.leftChild;
         AVLNode<T> pivot = (AVLNode<T>)leftNode.rightChild;
@@ -162,7 +285,7 @@ public class AVLTree<T> extends BinarySearchTree<T> {
         pivot.rightChild = node;
         node.balanceFactor = leftNode.balanceFactor = 0;
     }
-    private void rightLeft(AVLNode<T> node){
+    private void rightLeftRotation(AVLNode<T> node){
         AVLNode<T> parent = node.parent;
         AVLNode<T> rightNode = (AVLNode<T>)node.rightChild;
         AVLNode<T> pivot = (AVLNode<T>)rightNode.leftChild;
@@ -190,70 +313,5 @@ public class AVLTree<T> extends BinarySearchTree<T> {
         pivot.leftChild = node;
         pivot.rightChild = rightNode;
         node.balanceFactor = rightNode.balanceFactor = 0;
-    }
-    @Override
-    public void delete(int key){
-        AVLNode<T> node = deleteO(key);
-
-    }
-    private AVLNode<T> deleteO(int key){
-        AVLNode<T> node = (AVLNode<T>)root;
-        AVLNode<T> parentNode = null;
-        while (true){
-            if(node.key == key) {
-                if (node.leftChild == null && node.rightChild == null) {
-                    if (node == root) {
-                        root = null;
-                        return null;
-                    }
-                    if (parentNode.leftChild == node) {
-                        parentNode.leftChild = null;
-                    } else {
-                        parentNode.rightChild = null;
-                    }
-                } else if (node.leftChild == null) {
-                    if (node == root) {
-                        root = root.rightChild;
-                        ((AVLNode<T>)root).parent = null;
-                        return null;
-                    }
-                    if (parentNode.leftChild == node) {
-                        parentNode.leftChild = node.rightChild;
-                    } else {
-                        parentNode.rightChild = node.rightChild;
-
-                    }
-                    ((AVLNode<T>)node.rightChild).parent = parentNode;
-                } else if (node.rightChild == null) {
-                    if (node == root) {
-                        root = root.leftChild;
-                        ((AVLNode<T>)root).parent = null;
-                        return null;
-                    }
-                    if (parentNode.leftChild == node) {
-                        parentNode.leftChild = node.leftChild;
-                    } else {
-                        parentNode.rightChild = node.leftChild;
-                    }
-                    ((AVLNode<T>)node.leftChild).parent = parentNode;
-                } else {
-                    Node<T> replaceNode = findPredecessorNode(node);
-                    assert replaceNode != null;
-                    deleteO(replaceNode.key);
-                    node.replace(replaceNode.key, replaceNode.value);
-                }
-                return parentNode;
-            }
-            parentNode = node;
-            if(node.key < key){
-                node = (AVLNode<T>)node.rightChild;
-            }else{
-                node = (AVLNode<T>)node.leftChild;
-            }
-            if(node == null){
-                System.out.println("要删除的数据不存在, key=" + key);
-                return null;
-            }
-        }
     }
 }

@@ -190,26 +190,33 @@ public class AVLTree<T> extends BinarySearchTree<T> {
     }
 
     /**
-     * 删除操作的旋转条件和插入操作的略有不同
+     * 删除操作的旋转条件和插入操作的略有不同,
+     * 并且对于删除操作, 做完一次旋转后, 还需向上回溯寻找可能的失衡节点并对其做旋转
+     * todo : 对于上层节点的平衡因子做更新
      * @param node 要旋转的根节点
      */
     private void rotateForDeletion(AVLNode<T> node){
-        assert node != null && (node.balanceFactor == -2 || node.balanceFactor == 2);
-
-        if(node.balanceFactor == 2){
-            int factor = ((AVLNode)node.leftChild).balanceFactor;
-            if(factor == 1 || factor == 0){
-                rightRotation(node);
-            }else if(factor == -1){
-                leftRightRotation(node);
+        while (node != null) {
+            if (node.balanceFactor == 2) {
+                int factor = ((AVLNode) node.leftChild).balanceFactor;
+                if (factor == 1 || factor == 0) {
+                    rightRotation(node);
+                } else if (factor == -1) {
+                    leftRightRotation(node);
+                }
+            } else if (node.balanceFactor == -2) {
+                int factor = ((AVLNode) node.rightChild).balanceFactor;
+                if (factor == -1 || factor == 0) {
+                    leftRotation(node);
+                } else if (factor == 1) {
+                    rightLeftRotation(node);
+                }
             }
-        }else{
-            int factor = ((AVLNode)node.rightChild).balanceFactor;
-            if(factor == -1 || factor == 0){
-                leftRotation(node);
-            }else if(factor == 1){
-                rightLeftRotation(node);
-            }
+            //todo
+//            if(newroot.balanceFactor != 0){
+//                break;
+//            }
+            node = node.parent;
         }
     }
     private void rightRotation(AVLNode<T> node){

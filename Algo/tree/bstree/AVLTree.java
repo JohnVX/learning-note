@@ -71,36 +71,44 @@ public class AVLTree<T> extends BinarySearchTree<T> {
         }
     }
 
+    /**
+     * 删除节点
+     * @param key 要被删除节点的 key
+     */
     @Override
-    @SuppressWarnings("unchecked")
     public void delete(int key){
-        AVLNode<T> node = deleteO(key);
-        if(node == null) return;
+        AVLNode<T> parentNode = deleteO(key);
+        if(parentNode == null) return;
         AVLNode<T> rotateRoot = null;
-        while (node != null){
-            if(node.balanceFactor < -1 || node.balanceFactor > 1){
-                rotateRoot = node;
-            }
-            if(node.balanceFactor != 0){
+
+        //向上回溯更新树节点的平衡因子
+        while (parentNode != null) {
+            //parentNode.balanceFactor != 0, 说明此次的删除节点操作没有使以 parentNode 为根的子树高度降低, 因此更上层树的平衡情况不变,此时无需继续向上回溯更新树节点的平衡因子了
+            if(parentNode.balanceFactor != 0){
                 break;
             }
-            if(node.parent != null) {
-                if (node.parent.leftChild == node) {
-                    node.parent.balanceFactor--;
+            if (parentNode.parent != null) {
+                if (parentNode.parent.leftChild == parentNode) {
+                    parentNode.parent.balanceFactor--;
                 } else {
-                    node.parent.balanceFactor++;
+                    parentNode.parent.balanceFactor++;
+                }
+                if (rotateRoot == null && (parentNode.parent.balanceFactor < -1 || parentNode.parent.balanceFactor > 1)) {
+                    rotateRoot = parentNode;
                 }
             }
-            node = node.parent;
+            parentNode = parentNode.parent;
         }
+        //从底层节点开始做旋转, 然后向上进行旋转
         if(rotateRoot != null){
             rotateForDeletion(rotateRoot);
         }
     }
 
     /**
+     * 查找节点 -> 删除节点 -> 更新被删除节点的父节点的平衡因子
      * @param key 要删除的节点的 key
-     * @return 被删除的节点的父节点
+     * @return parentNode 被删除的节点的父节点
      */
     private AVLNode<T> deleteO(int key){
         AVLNode<T> node = (AVLNode<T>)root;
@@ -150,10 +158,8 @@ public class AVLTree<T> extends BinarySearchTree<T> {
                 } else {
                     //找前邻节点, 这一定是个叶子节点, delete0 的递归次数一定只有 1
                     AVLNode<T> replaceNode = (AVLNode<T>)findPredecessorNode(node);
-                    assert replaceNode != null;
                     parentNode = deleteO(replaceNode.key);
                     node.replace(replaceNode.key, replaceNode.value);
-                    return parentNode;
                 }
                 return parentNode;
             }
@@ -193,7 +199,7 @@ public class AVLTree<T> extends BinarySearchTree<T> {
      * 删除操作的旋转条件和插入操作的略有不同,
      * 并且对于删除操作, 做完一次旋转后, 还需向上回溯寻找可能的失衡节点并对其做旋转
      * todo : 对于上层节点的平衡因子做更新
-     * @param node 要旋转的根节点
+     * @param node 要旋转的节点
      */
     private void rotateForDeletion(AVLNode<T> node){
         while (node != null) {

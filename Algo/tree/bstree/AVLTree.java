@@ -70,7 +70,28 @@ public class AVLTree<T> extends BinarySearchTree<T> {
             rotateForInsertion(rotateRoot);
         }
     }
+    private void rotateForInsertion(AVLNode<T> node){
+        assert node != null && (node.balanceFactor == -2 || node.balanceFactor == 2);
 
+        if(node.balanceFactor == 2 && ((AVLNode)node.leftChild).balanceFactor == 1){
+            rightRotation(node, RotationForType.Insertion);
+            return;
+        }
+        if((node.balanceFactor == -2) && ((AVLNode)node.rightChild).balanceFactor == -1){
+            leftRotation(node, RotationForType.Insertion);
+            return;
+        }
+        if(node.balanceFactor == 2 && ((AVLNode)node.leftChild).balanceFactor == -1){
+            leftRightRotation(node, RotationForType.Insertion);
+            return;
+        }
+        if(node.balanceFactor == -2 && ((AVLNode)node.rightChild).balanceFactor == 1){
+            rightLeftRotation(node, RotationForType.Insertion);
+        }
+    }
+    enum RotationForType {
+        Insertion, Deletion
+    }
     /**
      * 删除节点
      * @param key 要被删除节点的 key
@@ -79,32 +100,40 @@ public class AVLTree<T> extends BinarySearchTree<T> {
     public void delete(int key){
         AVLNode<T> parentNode = deleteO(key);
         if(parentNode == null) return;
-        AVLNode<T> rotateRoot = null;
+        AVLNode<T> rotateRoot;
 
-        //向上回溯更新树节点的平衡因子
-        while (parentNode != null) {
-            //parentNode.balanceFactor != 0, 说明此次的删除节点操作没有使以 parentNode 为根的子树高度降低, 因此更上层树的平衡情况不变,此时无需继续向上回溯更新树节点的平衡因子了
-            if(parentNode.balanceFactor != 0){
-                break;
-            }
-            if (parentNode.parent != null) {
-                if (parentNode.parent.leftChild == parentNode) {
-                    parentNode.parent.balanceFactor--;
-                } else {
-                    parentNode.parent.balanceFactor++;
-                }
-                if (rotateRoot == null && (parentNode.parent.balanceFactor < -1 || parentNode.parent.balanceFactor > 1)) {
-                    rotateRoot = parentNode;
-                }
-            }
-            parentNode = parentNode.parent;
-        }
+        rotateRoot = backtraceForDeletion(parentNode);
         //从底层节点开始做旋转, 然后向上进行旋转
         if(rotateRoot != null){
             rotateForDeletion(rotateRoot);
         }
     }
-
+    /**
+     * 向上回溯更新树节点的平衡因子
+     * @param node 节点
+     * @return 需要做旋转操作的节点
+     */
+    private AVLNode<T> backtraceForDeletion(AVLNode<T> node){
+        AVLNode<T> rotateRoot = null;
+        while (node != null){
+            //node.balanceFactor != 0, 说明此次的删除节点操作没有使以 node 为根的子树高度降低, 因此更上层树的平衡情况不变,此时无需继续向上回溯更新树节点的平衡因子了
+            if(node.balanceFactor != 0){
+                break;
+            }
+            if(node.parent != null){
+                if(node.parent.leftChild == node){
+                    node.parent.balanceFactor--;
+                }else {
+                    node.parent.balanceFactor++;
+                }
+                if(rotateRoot == null && (node.parent.balanceFactor < -1 || node.parent.balanceFactor > 1)){
+                    rotateRoot = node.parent;
+                }
+            }
+            node = node.parent;
+        }
+        return rotateRoot;
+    }
     /**
      * 查找节点 -> 删除节点 -> 更新被删除节点的父节点的平衡因子
      * @param key 要删除的节点的 key
@@ -157,7 +186,7 @@ public class AVLTree<T> extends BinarySearchTree<T> {
                     ((AVLNode<T>)node.leftChild).parent = parentNode;
                 } else {
                     //找前邻节点, 这一定是个叶子节点, delete0 的递归次数一定只有 1
-                    AVLNode<T> replaceNode = (AVLNode<T>)findPredecessorNode(node);
+                    Node<T> replaceNode = findPredecessorNode(node);
                     parentNode = deleteO(replaceNode.key);
                     node.replace(replaceNode.key, replaceNode.value);
                 }
@@ -175,71 +204,42 @@ public class AVLTree<T> extends BinarySearchTree<T> {
             }
         }
     }
-    private void rotateForInsertion(AVLNode<T> node){
-        assert node != null && (node.balanceFactor == -2 || node.balanceFactor == 2);
-
-        if(node.balanceFactor == 2 && ((AVLNode)node.leftChild).balanceFactor == 1){
-            rightRotation(node);
-            return;
-        }
-        if((node.balanceFactor == -2) && ((AVLNode)node.rightChild).balanceFactor == -1){
-            leftRotation(node);
-            return;
-        }
-        if(node.balanceFactor == 2 && ((AVLNode)node.leftChild).balanceFactor == -1){
-            leftRightRotation(node);
-            return;
-        }
-        if(node.balanceFactor == -2 && ((AVLNode)node.rightChild).balanceFactor == 1){
-            rightLeftRotation(node);
-        }
-    }
-
     /**
      * 删除操作的旋转条件和插入操作的略有不同,
      * 并且对于删除操作, 做完一次旋转后, 还需向上回溯寻找可能的失衡节点并对其做旋转
-     * todo : 对于上层节点的平衡因子做更新
      * @param node 要旋转的节点
      */
     private void rotateForDeletion(AVLNode<T> node){
-        while (node != null) {
+        if (node != null) {
+            AVLNode<T> parent = node.parent;
+            AVLNode<T> rotationRoot;
             if (node.balanceFactor == 2) {
                 int factor = ((AVLNode) node.leftChild).balanceFactor;
                 if (factor == 1 || factor == 0) {
-                    rightRotation(node);
+                    rightRotation(node, RotationForType.Deletion);
                 } else if (factor == -1) {
-                    leftRightRotation(node);
+                    leftRightRotation(node, RotationForType.Deletion);
                 }
             } else if (node.balanceFactor == -2) {
                 int factor = ((AVLNode) node.rightChild).balanceFactor;
                 if (factor == -1 || factor == 0) {
-                    leftRotation(node);
+                    leftRotation(node, RotationForType.Deletion);
                 } else if (factor == 1) {
-                    rightLeftRotation(node);
+                    rightLeftRotation(node, RotationForType.Deletion);
                 }
             }
-            //todo
-//            if(newroot.balanceFactor != 0){
-//                break;
-//            }
-            node = node.parent;
-        }
-    }
-    private void rightRotation(AVLNode<T> node){
-        AVLNode<T> parent = node.parent;
-        AVLNode<T> pivot = (AVLNode<T>)node.leftChild;
-
-        if(node == root){
-            root = pivot;
-        }else {
-            if(parent.leftChild == node){
-                parent.leftChild = pivot;
-            }else {
-                parent.rightChild = pivot;
+            node = parent;
+            rotationRoot = backtraceForDeletion(node);
+            if(rotationRoot != null){
+                rotateForDeletion(rotationRoot);
             }
         }
-        pivot.parent = parent;
-        node.parent = pivot;
+    }
+    private void rightRotation(AVLNode<T> node, RotationForType rotationForType){
+        AVLNode<T> pivot = (AVLNode<T>)node.leftChild;
+
+        adjustParentRelationForOneRotation(node, pivot, rotationForType);
+
         if(pivot.rightChild != null) {
             ((AVLNode)pivot.rightChild).parent = node;
         }
@@ -247,84 +247,88 @@ public class AVLTree<T> extends BinarySearchTree<T> {
         pivot.rightChild = node;
         pivot.balanceFactor = node.balanceFactor = 0;
     }
-    private void leftRotation(AVLNode<T> node){
-        AVLNode<T> parent = node.parent;
+    private void leftRotation(AVLNode<T> node, RotationForType rotationForType){
         AVLNode<T> pivot = (AVLNode<T>)node.rightChild;
 
-        if(node == root){
-            root = pivot;
-        }else {
-            if(parent.leftChild == node){
-                parent.leftChild = pivot;
-            }else {
-                parent.rightChild = pivot;
-            }
-        }
-        pivot.parent = parent;
-        node.parent = pivot;
-        if(pivot.leftChild != null) {
-            ((AVLNode)pivot.leftChild).parent = node;
+        adjustParentRelationForOneRotation(node, pivot, rotationForType);
+
+        if(pivot.leftChild != null){
+            ((AVLNode<T>)pivot.leftChild).parent = node;
         }
         node.rightChild = pivot.leftChild;
         pivot.leftChild = node;
         pivot.balanceFactor = node.balanceFactor = 0;
     }
-    private void leftRightRotation(AVLNode<T> node){
-        AVLNode<T> parent = node.parent;
+    private void leftRightRotation(AVLNode<T> node, RotationForType rotationForType){
         AVLNode<T> leftNode = (AVLNode<T>)node.leftChild;
         AVLNode<T> pivot = (AVLNode<T>)leftNode.rightChild;
 
-        if(node == root){
-            root = pivot;
-        }else {
-            if(parent.leftChild == node){
-                parent.leftChild = pivot;
-            }else {
-                parent.rightChild = pivot;
-            }
-        }
-        pivot.parent = parent;
-        leftNode.parent = pivot;
-        node.parent = pivot;
-        if(pivot.leftChild != null) {
-            ((AVLNode)pivot.leftChild).parent = leftNode;
-        }
-        if(pivot.rightChild != null) {
-            ((AVLNode)pivot.rightChild).parent = node;
-        }
-        leftNode.rightChild = pivot.leftChild;
-        node.leftChild = pivot.rightChild;
-        pivot.leftChild = leftNode;
-        pivot.rightChild = node;
-        node.balanceFactor = leftNode.balanceFactor = 0;
+        adjustParentRelationForTwoRotation(node, pivot, leftNode, rotationForType);
+        adjustChildRelationForRotation(pivot, leftNode, node);
     }
-    private void rightLeftRotation(AVLNode<T> node){
-        AVLNode<T> parent = node.parent;
+    private void rightLeftRotation(AVLNode<T> node, RotationForType rotationForType){
         AVLNode<T> rightNode = (AVLNode<T>)node.rightChild;
         AVLNode<T> pivot = (AVLNode<T>)rightNode.leftChild;
+
+        adjustParentRelationForTwoRotation(node, pivot, rightNode, rotationForType);
+        adjustChildRelationForRotation(pivot, node, rightNode);
+    }
+    private void adjustChildRelationForRotation(AVLNode<T> pivot, AVLNode<T> node1, AVLNode<T> node2){
+        node1.parent = pivot;
+        node2.parent = pivot;
+        if(pivot.leftChild != null){
+            ((AVLNode)pivot.leftChild).parent = node1;
+        }
+        if(pivot.rightChild != null){
+            ((AVLNode)pivot.rightChild).parent = node2;
+        }
+        node1.rightChild = pivot.leftChild;
+        node2.leftChild = pivot.rightChild;
+        pivot.leftChild = node1;
+        pivot.rightChild = node2;
+        node1.balanceFactor = node2.balanceFactor = 0;
+    }
+    private void adjustParentRelationForOneRotation(AVLNode<T> node, AVLNode<T> pivot, RotationForType rotationForType){
+        adjustParentRelationForRotation(node, pivot, null, rotationForType);
+    }
+    private void adjustParentRelationForTwoRotation(AVLNode<T> node, AVLNode<T> pivot, AVLNode<T> child, RotationForType rotationForType){
+        adjustParentRelationForRotation(node, pivot, child, rotationForType);
+    }
+    private void adjustParentRelationForRotation(AVLNode<T> node, AVLNode<T> pivot, AVLNode<T> child, RotationForType rotationForType){
+        AVLNode<T> parent = node.parent;
 
         if(node == root){
             root = pivot;
         }else {
             if(parent.leftChild == node){
                 parent.leftChild = pivot;
+                if(rotationForType == RotationForType.Deletion){
+                    if(child != null){
+                        if(child.balanceFactor == -1 || child.balanceFactor == 1){
+                            parent.balanceFactor--;
+                        }
+                    }else {
+                        if(pivot.balanceFactor == -1 || pivot.balanceFactor == 1){
+                            parent.balanceFactor--;
+                        }
+                    }
+                }
             }else {
                 parent.rightChild = pivot;
+                if(rotationForType == RotationForType.Deletion){
+                    if(child != null) {
+                        if (child.balanceFactor == -1 || child.balanceFactor == 1) {
+                            parent.balanceFactor++;
+                        }
+                    }else {
+                        if (pivot.balanceFactor == -1 || pivot.balanceFactor == 1) {
+                            parent.balanceFactor++;
+                        }
+                    }
+                }
             }
         }
-        pivot.parent = parent;
         node.parent = pivot;
-        rightNode.parent = pivot;
-        if(pivot.leftChild != null){
-            ((AVLNode)pivot.leftChild).parent = node;
-        }
-        if(pivot.rightChild != null){
-            ((AVLNode)pivot.rightChild).parent = rightNode;
-        }
-        node.rightChild = pivot.leftChild;
-        rightNode.leftChild = pivot.rightChild;
-        pivot.leftChild = node;
-        pivot.rightChild = rightNode;
-        node.balanceFactor = rightNode.balanceFactor = 0;
+        pivot.parent = parent;
     }
 }

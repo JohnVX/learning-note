@@ -137,6 +137,12 @@ public class BinarySearchTree<T> {
             }
         }
     }
+
+    /**
+     * 找前邻节点
+     * @param startNode startNode
+     * @return 前邻节点, 复制节点的 key 和 value
+     */
     Node<T> findPredecessorNode(Node<T> startNode){
         if(startNode.leftChild == null){
             System.out.println("此节点无前邻节点");

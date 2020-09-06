@@ -21,6 +21,9 @@ public class BinarySearchTree<T> {
         public T getValue() {
             return value;
         }
+        public int getKey() {
+            return key;
+        }
         void replace(int key, T value){
             this.key = key;
             this.value = value;

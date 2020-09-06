@@ -47,6 +47,10 @@ public class AVLTree<T> extends BinarySearchTree<T> {
         //If the balance factor temporarily becomes ±2, this has to be repaired by an appropriate rotation after which the subtree has the same height as before
         AVLNode<T> rotateRoot = null;
         while(node != this.root){
+            //The retracing can stop if the balance factor becomes 0 implying that the height of that subtree remains unchanged.
+            if(node.balanceFactor == 0){
+                break;
+            }
             if (node.parent.leftChild == node) {
                 node.parent.balanceFactor++;
                 if(node.parent.balanceFactor > 1){
@@ -59,10 +63,6 @@ public class AVLTree<T> extends BinarySearchTree<T> {
                     rotateRoot = node.parent;
                     break;
                 }
-            }
-            //The retracing can stop if the balance factor becomes 0 implying that the height of that subtree remains unchanged.
-            if(node.parent.balanceFactor == 0){
-                break;
             }
             node = node.parent;
         }
@@ -116,6 +116,9 @@ public class AVLTree<T> extends BinarySearchTree<T> {
     private AVLNode<T> backtraceForDeletion(AVLNode<T> node){
         AVLNode<T> rotateRoot = null;
         while (node != null){
+            if(node.balanceFactor < -1 || node.balanceFactor > 1){
+                rotateRoot = node;
+            }
             //node.balanceFactor != 0, 说明此次的删除节点操作没有使以 node 为根的子树高度降低, 因此更上层树的平衡情况不变,此时无需继续向上回溯更新树节点的平衡因子了
             if(node.balanceFactor != 0){
                 break;
@@ -125,9 +128,6 @@ public class AVLTree<T> extends BinarySearchTree<T> {
                     node.parent.balanceFactor--;
                 }else {
                     node.parent.balanceFactor++;
-                }
-                if(rotateRoot == null && (node.parent.balanceFactor < -1 || node.parent.balanceFactor > 1)){
-                    rotateRoot = node.parent;
                 }
             }
             node = node.parent;
@@ -245,7 +245,12 @@ public class AVLTree<T> extends BinarySearchTree<T> {
         }
         node.leftChild = pivot.rightChild;
         pivot.rightChild = node;
-        pivot.balanceFactor = node.balanceFactor = 0;
+        if(rotationForType == RotationForType.Insertion) {
+            pivot.balanceFactor = node.balanceFactor = 0;
+        } else if (rotationForType == RotationForType.Deletion) {
+            node.balanceFactor--;
+            pivot.balanceFactor--;
+        }
     }
     private void leftRotation(AVLNode<T> node, RotationForType rotationForType){
         AVLNode<T> pivot = (AVLNode<T>)node.rightChild;
@@ -257,7 +262,12 @@ public class AVLTree<T> extends BinarySearchTree<T> {
         }
         node.rightChild = pivot.leftChild;
         pivot.leftChild = node;
-        pivot.balanceFactor = node.balanceFactor = 0;
+        if(rotationForType == RotationForType.Insertion){
+            pivot.balanceFactor = node.balanceFactor = 0;
+        }else if(rotationForType == RotationForType.Deletion){
+            node.balanceFactor++;
+            pivot.balanceFactor++;
+        }
     }
     private void leftRightRotation(AVLNode<T> node, RotationForType rotationForType){
         AVLNode<T> leftNode = (AVLNode<T>)node.leftChild;

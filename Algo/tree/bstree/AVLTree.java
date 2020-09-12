@@ -206,7 +206,7 @@ public class AVLTree<T> extends BinarySearchTree<T> {
     }
     /**
      * 删除操作的旋转条件和插入操作的略有不同,
-     * 并且对于删除操作, 做完一次旋转后, 还需向上回溯寻找可能的失衡节点并对其做旋转
+     * 并且对于删除操作, 做完一棵子树的旋转后, 还需向上回溯寻找可能的失衡节点并对其做旋转
      * @param node 要旋转的节点
      */
     private void rotateForDeletion(AVLNode<T> node){
@@ -288,15 +288,29 @@ public class AVLTree<T> extends BinarySearchTree<T> {
         node2.parent = pivot;
         if(pivot.leftChild != null){
             ((AVLNode)pivot.leftChild).parent = node1;
+            if(pivot.balanceFactor == 0 || pivot.balanceFactor == 1) {
+                node1.balanceFactor = 0;
+            }else {
+                node1.balanceFactor = 1;
+            }
+        }else {
+            node1.balanceFactor = 1;
         }
         if(pivot.rightChild != null){
             ((AVLNode)pivot.rightChild).parent = node2;
+            if(pivot.balanceFactor == 0 || pivot.balanceFactor == -1) {
+                node2.balanceFactor = 0;
+            }else {
+                node2.balanceFactor = -1;
+            }
+        }else {
+            node2.balanceFactor = -1;
         }
         node1.rightChild = pivot.leftChild;
         node2.leftChild = pivot.rightChild;
         pivot.leftChild = node1;
         pivot.rightChild = node2;
-        node1.balanceFactor = node2.balanceFactor = 0;
+        pivot.balanceFactor = 0;
     }
     private void adjustParentRelationForOneRotation(AVLNode<T> node, AVLNode<T> pivot, RotationForType rotationForType){
         adjustParentRelationForRotation(node, pivot, null, rotationForType);

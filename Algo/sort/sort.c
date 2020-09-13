@@ -145,9 +145,42 @@ static void quick_sort_recursive(int arr[], int start, int end){
     quick_sort_recursive(arr, start, left-1);
     quick_sort_recursive(arr, left+1, end);
 }
-//todo
+typedef struct {
+    int start, end;
+} Range;
+static Range new_range(int s, int e) {
+    Range r;
+    r.start = s;
+    r.end = e;
+    return r;
+}
 static void quick_sort_iterative(int arr[], int len){
-    //https://www.runoob.com/cprogramming/c-sort-algorithm.html
+    if (len <= 0)
+        return;
+    //r[] 是用来取代递归调用的栈
+    Range r[len];
+    int p = 0;
+    r[p++] = new_range(0, len - 1);
+    while (p) {
+        Range range = r[--p];
+        if (range.start >= range.end)
+            continue;
+        int mid = arr[(range.start + range.end) / 2];
+        int left = range.start, right = range.end;
+        do{
+            while (arr[left] < mid) ++left;
+            while (arr[right] > mid) --right;
+            if (left <= right){
+                int tmp = arr[right];
+                arr[right] = arr[left];
+                arr[left] = tmp;
+                left++;
+                right--;
+            }
+        } while (left <= right);
+        if (range.start < right) r[p++] = new_range(range.start, right);
+        if (range.end > left) r[p++] = new_range(left, range.end);
+    }
 }
 void quick_sort(int arr[], int len){
     //quick_sort_recursive(arr, 0, len-1);

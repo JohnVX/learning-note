@@ -37,7 +37,7 @@ public class SkipList<T>{
                     return null;
                 }else {
                     //到下层的前邻节点处继续查找
-                    node = prev.next.nextLevelNode;
+                    node = prev.nextLevelNode;
                 }
             }else {
                 return node.value;
@@ -52,8 +52,8 @@ public class SkipList<T>{
 
     /**
      * 从 head 数组的底层开始, 查找被添加节点应在的位置, 本层添加好节点后, 概率性地选择是否往上层添加节点,
-     * 若是, 则往上层添加节点, 并重复概率选择操作, 直到到达 head 数组的顶层,
-     * 到达到达 head 数组的顶层后, 决定是否扩展 head 数组, 若是, 则扩展之
+     * 若是, 则往上层添加节点, 并重复概率选择操作, 若否，则操作结束
+     * 到达 head 数组的顶层后, 决定是否扩展 head 数组, 若是, 则扩展之, 若否, 则操作结束
      * @param key key
      * @param value value
      */

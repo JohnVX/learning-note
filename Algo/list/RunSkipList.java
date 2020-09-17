@@ -36,7 +36,10 @@ public class RunSkipList {
         skipList.add(18, "");
         skipList.add(17, "");
         skipList.add(100, "");
-        skipList.delete(60);
-        out.println(skipList.get(9));
+        skipList.delete(1);
+//        skipList.delete(13);
+//        skipList.delete(3);
+//        skipList.delete(17);
+        out.println(skipList);
     }
 }

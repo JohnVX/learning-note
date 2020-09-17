@@ -10,6 +10,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class SkipList<T>{
     private Node[] head;
     private boolean headArrayExtended;
+    private boolean goUp;
     @SuppressWarnings("unchecked")
     public SkipList() {
         //head 的初始化
@@ -85,7 +86,7 @@ public class SkipList<T>{
             if (node == null || node.key > key) {
                 recordNodes[index--] = prev;
                 //到下层的前邻节点处继续查找
-                if (prev == head[index + 1]) {
+                if (prev == head[index+1]) {
                     node = head[index];
                 } else {
                     node = prev.nextLevelNode;
@@ -100,18 +101,21 @@ public class SkipList<T>{
         nextLevelNode = prev.next;
         while (!headArrayExtended) {
             //0.5 的命中概率, 概率性地选择是否往上层添加节点
-            if (ThreadLocalRandom.current().nextBoolean()) {
+            if (!(goUp = ThreadLocalRandom.current().nextBoolean())) {
                 return;
             }
             index++;
-            extendHeadArrayIFNeeded(index);
+            extendHeadArrayIfNeeded(index);
             if (head[index] == null) {
+                //head[index] == null ，意味着 head 数组被扩展了
                 head[index] = new Node(0, null, null, null);
                 Node<T> copiedNode = head[index - 1].next;
                 if (copiedNode.key == key) {
                     head[index].next = new Node<>(key, value, null, copiedNode);
+                }else {
+                    head[index].next = new Node<>(copiedNode.key, copiedNode.value, null, copiedNode);
+                    head[index].next.next = new Node<>(key, value, null, nextLevelNode);
                 }
-                head[index].next = new Node<>(copiedNode.key, copiedNode.value, null, copiedNode);
             }else {
                 recordNodes[index].next = new Node<>(key, value, recordNodes[index].next, nextLevelNode);
                 nextLevelNode = recordNodes[index].next;
@@ -134,7 +138,7 @@ public class SkipList<T>{
 
         }
     }
-    private void extendHeadArrayIFNeeded(int index){
+    private void extendHeadArrayIfNeeded(int index){
         if ((head.length - 1) < index) {
             Node[] newHead = new Node[head.length+1];
             System.arraycopy(head, 0, newHead, 0, head.length);

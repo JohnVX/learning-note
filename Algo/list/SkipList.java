@@ -1,6 +1,6 @@
 package list;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 概率性数据结构
@@ -8,14 +8,12 @@ import java.util.Random;
  * 它使得包含 n 个元素的有序序列的查找和插入操作的平均时间复杂度都是 O(log n)，优于数组的 O(n) 复杂度
  */
 public class SkipList<T>{
-    private Object[] head;
-    private Random random;
+    private Node[] head;
+    @SuppressWarnings("unchecked")
     public SkipList() {
         //head 的初始化
-        head = new Object[1];
-        head[0] = null;
-
-        random = new Random(System.currentTimeMillis());
+        head = new Node[1];
+        head[0] = new Node(0, null, null, null);
     }
     static class Node<T>{
         int key;
@@ -31,14 +29,21 @@ public class SkipList<T>{
             this.nextLevelNode = nextLevelNode;
         }
     }
+    public T get(int key){
+        Node<T> node = getNode(key);
+        if(node != null){
+            return node.value;
+        }else {
+            return null;
+        }
+    }
     /**
      * 从 head 数组的顶层开始查找, 本层查找不到, 则到下层的前邻节点处继续查找
      * @param key key
-     * @return T
      */
     @SuppressWarnings("unchecked")
-    public T get(int key){
-        Node<T> node = (Node<T>)head[head.length-1];
+    private Node<T> getNode(int key){
+        Node<T> node = head[head.length-1].next;
         Node<T> prev = null;
 
         while (node != null && node.key != key){
@@ -51,16 +56,15 @@ public class SkipList<T>{
                     node = prev.nextLevelNode;
                 }
             }else {
-                return node.value;
+                return node;
             }
         }
         if(node == null){
             return null;
         }else {
-            return node.value;
+            return node;
         }
     }
-
     /**
      * 从 head 数组的底层开始( index == 0 ), 查找被添加节点应在的位置, 本层添加好节点后, 概率性地选择是否往上层添加节点,
      * 若是, 则往上层添加节点, 并重复概率选择操作, 若否，则操作结束
@@ -68,6 +72,7 @@ public class SkipList<T>{
      * @param key key
      * @param value value
      */
+    //todo 应从 head 数组的顶层开始(index == (length-1)), 查找被添加节点应在的位置
     @SuppressWarnings("unchecked")
     public void add(int key, T value){
         int index = 0;
@@ -76,31 +81,31 @@ public class SkipList<T>{
             if(head.length < (index+1)){
                 extendHeadArray();
             }
-            Node<T> node = (Node<T>)head[index];
-            if (node == null) {
+            if (head[index] == null) {
+                head[index] = new Node(0, null, null, null);
                 if(index > 0){
-                    Node<T> copiedNode = (Node<T>)head[index-1];
+                    Node<T> copiedNode = head[index-1].next;
                     if(copiedNode.key != key){
                         //构建上层的第一个数据节点
-                        head[index] = new Node<>(copiedNode.key, copiedNode.value, null, copiedNode);
-                        node = (Node<T>)head[index];
+                        head[index].next = new Node<>(copiedNode.key, copiedNode.value, null, copiedNode);
                     }else {
                         //添加第一个节点
-                        head[index] = new Node<>(key, value, null, copiedNode);
+                        head[index].next = new Node<>(key, value, null, copiedNode);
                         return;
                     }
                 }else {
                     //添加第一个节点
-                    head[index] = new Node<>(key, value, null, null);
+                    head[index].next = new Node<>(key, value, null, null);
                     return;
                 }
             }
-            Node<T> prev = (Node<T>)head[index];
+            Node<T> prev = head[index];
+            Node<T> node = prev.next;
             for (; node != null && node.key < key; prev = node, node = node.next) ;
             //node == null or node.key >= key
             prev.next = new Node<>(key, value, node, nextLevelNode);
             //0.5 的命中概率, 概率性地选择是否往上层添加节点
-            if (random.nextInt(10000) < 5000) {
+            if (ThreadLocalRandom.current().nextBoolean()){
                 index++;
                 nextLevelNode = prev.next;
             } else {
@@ -115,12 +120,17 @@ public class SkipList<T>{
      * 删除节点后, 若 head 数组的最上层( index == (length-1) )已无数据节点, 则重建 head 数组以去掉数组最上层
      * @param key key
      */
+    //todo 应从 head 数组的顶层开始(index == (length-1)), 查找被添加节点应在的位置
     public void delete(int key){
+        Node<T> node = getNode(key);
+        if(node == null){
+            System.out.println("节点不存在，故不能被删除, key " + key);
+        }else {
 
+        }
     }
     private void extendHeadArray(){
-        int newLength = head.length * 2;
-        Object[] newHead = new Object[newLength];
+        Node[] newHead = new Node[head.length+1];
         System.arraycopy(head, 0, newHead, 0, head.length);
         head = newHead;
     }

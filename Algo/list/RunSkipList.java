@@ -35,6 +35,7 @@ public class RunSkipList {
         skipList.add(15, "");
         skipList.add(18, "");
         skipList.add(17, "");
+        skipList.add(100, "");
         skipList.delete(60);
         out.println(skipList.get(9));
     }

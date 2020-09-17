@@ -9,11 +9,13 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class SkipList<T>{
     private Node[] head;
+    private boolean headArrayExtended;
     @SuppressWarnings("unchecked")
     public SkipList() {
         //head 的初始化
         head = new Node[1];
         head[0] = new Node(0, null, null, null);
+        headArrayExtended = false;
     }
     static class Node<T>{
         int key;
@@ -59,11 +61,7 @@ public class SkipList<T>{
                 return node;
             }
         }
-        if(node == null){
-            return null;
-        }else {
-            return node;
-        }
+        return node;
     }
     /**
      * 从 head 数组的顶层开始(index == (length-1)), 查找被添加节点应在的位置,最终在底层定位到位置,
@@ -74,81 +72,49 @@ public class SkipList<T>{
      * @param value value
      */
     @SuppressWarnings("unchecked")
-    public void add(int key, T value){
-        int index = head.length-1;
+    public void add(int key, T value) {
+        headArrayExtended = false;
+        int index = head.length - 1;
         Node<T> prev = head[index];
         Node<T> node = head[index].next;
         Node<T>[] recordNodes = new Node[head.length];
+        Node<T> nextLevelNode;
 
-        while (index > 0){
-            for(; node != null && node.key < key; prev = node, node = node.next);
-            if(node == null || node.key > key){
+        while (index > 0) {
+            for (; node != null && node.key < key; prev = node, node = node.next) ;
+            if (node == null || node.key > key) {
                 recordNodes[index--] = prev;
                 //到下层的前邻节点处继续查找
-                if(prev == head[index+1]){
+                if (prev == head[index + 1]) {
                     node = head[index];
-                }else {
+                } else {
                     node = prev.nextLevelNode;
                 }
-            }else {
+            } else {
                 System.out.println("不能插入相同 key 的节点 key " + key);
                 return;
             }
         }
-        for(; node != null && node.key < key; prev = node, node = node.next);
+        for (; node != null && node.key < key; prev = node, node = node.next) ;
         prev.next = new Node<>(key, value, node, null);
-        //0.5 的命中概率, 概率性地选择是否往上层添加节点
-        if (ThreadLocalRandom.current().nextBoolean()){
-            index++;
-            nextLevelNode = prev.next;
-        } else {
-            return;
-        }
-
-
-
-
-
-
-
-
-        Node<T> nextLevelNode = null;
-        while (index > 0) {
-            if((head.length-1) < index){
-                extendHeadArray();
+        nextLevelNode = prev.next;
+        while (!headArrayExtended) {
+            //0.5 的命中概率, 概率性地选择是否往上层添加节点
+            if (ThreadLocalRandom.current().nextBoolean()) {
+                return;
             }
+            index++;
+            extendHeadArrayIFNeeded(index);
             if (head[index] == null) {
                 head[index] = new Node(0, null, null, null);
-                if(index > 0){
-                    Node<T> copiedNode = head[index-1].next;
-                    if(copiedNode.key != key){
-                        //构建上层的第一个数据节点
-                        head[index].next = new Node<>(copiedNode.key, copiedNode.value, null, copiedNode);
-                    }else {
-                        //添加第一个节点
-                        head[index].next = new Node<>(key, value, null, copiedNode);
-                        return;
-                    }
-                }else {
-                    //添加第一个节点
-                    head[index].next = new Node<>(key, value, null, null);
-                    break;
+                Node<T> copiedNode = head[index - 1].next;
+                if (copiedNode.key == key) {
+                    head[index].next = new Node<>(key, value, null, copiedNode);
                 }
-            }
-            Node<T> prev = head[index];
-            Node<T> node = prev.next;
-            //从 head 数组的顶层开始(index == (length-1)), 查找被添加节点应在的位置
-            for (; node != null && node.key < key; prev = node, node = node.next) ;
-            //node == null or node.key >= key
-
-
-            prev.next = new Node<>(key, value, node, nextLevelNode);
-            //0.5 的命中概率, 概率性地选择是否往上层添加节点
-            if (ThreadLocalRandom.current().nextBoolean()){
-                index++;
-                nextLevelNode = prev.next;
-            } else {
-                return;
+                head[index].next = new Node<>(copiedNode.key, copiedNode.value, null, copiedNode);
+            }else {
+                recordNodes[index].next = new Node<>(key, value, recordNodes[index].next, nextLevelNode);
+                nextLevelNode = recordNodes[index].next;
             }
         }
     }
@@ -168,9 +134,12 @@ public class SkipList<T>{
 
         }
     }
-    private void extendHeadArray(){
-        Node[] newHead = new Node[head.length+1];
-        System.arraycopy(head, 0, newHead, 0, head.length);
-        head = newHead;
+    private void extendHeadArrayIFNeeded(int index){
+        if ((head.length - 1) < index) {
+            Node[] newHead = new Node[head.length+1];
+            System.arraycopy(head, 0, newHead, 0, head.length);
+            head = newHead;
+            headArrayExtended = true;
+        }
     }
 }

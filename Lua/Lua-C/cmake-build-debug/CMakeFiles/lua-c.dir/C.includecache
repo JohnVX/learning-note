@@ -1,0 +1,42 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+D:/CLion/Projects/Lua-C/lauxlib.h
+stddef.h
+-
+stdio.h
+-
+lua.h
+D:/CLion/Projects/Lua-C/lua.h
+
+D:/CLion/Projects/Lua-C/lua.h
+stdarg.h
+-
+stddef.h
+-
+luaconf.h
+D:/CLion/Projects/Lua-C/luaconf.h
+
+D:/CLion/Projects/Lua-C/luaconf.h
+limits.h
+-
+stddef.h
+-
+stdint.h
+-
+assert.h
+-
+
+D:/CLion/Projects/Lua-C/shuwei_stack_dump.c
+stdio.h
+-
+lua.h
+D:/CLion/Projects/Lua-C/lua.h
+lauxlib.h
+D:/CLion/Projects/Lua-C/lauxlib.h
+

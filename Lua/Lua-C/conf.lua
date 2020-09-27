@@ -1,0 +1,6 @@
+-- configuration file
+
+function f (x, y)
+return (x+y)
+end
+

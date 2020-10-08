@@ -25,31 +25,18 @@ public class LongestCommonSubsequence {
             }
             StringBuilder sb = new StringBuilder();
             int i = lineX.length(), j = lineY.length();
-            int prev = -1;
             while (i != 0 && j != 0){
                 if(lengthArr[i-1][j-1] == lengthArr[i][j]){
                     i--;j--;
                 }else {
-                    //lengthArr[i][j] == lengthArr[i-1][j-1] + 1
-                    if(lineX.charAt(i-1) == lineY.charAt(j-1)){
-                        if(lengthArr[i][j] != prev) {
-                            sb.append(lineX.charAt(i - 1));
-                            prev = lengthArr[i][j];
-                        }
-                        i--;j--;
-                    }else if(lengthArr[i][j-1] == lengthArr[i][j]){
-                        if (lengthArr[i][j] != prev)  {
-                            sb.append(lineX.charAt(i - 1));
-                            prev = lengthArr[i][j];
-                        }
+                    if(lengthArr[i][j-1] != lengthArr[i][j] && lengthArr[i-1][j] != lengthArr[i][j]) {
+                        sb.append(lineX.charAt(i-1));
                         i--;
-                    }else{
-                        //lengthArr[i][j] == lengthArr[i-1][j]
-                        if(lengthArr[i][j] != prev) {
-                            sb.append(lineY.charAt(j - 1));
-                            prev = lengthArr[i][j];
-                        }
                         j--;
+                    }else if(lengthArr[i][j-1] == lengthArr[i][j]){
+                        j--;
+                    }else{
+                        i--;
                     }
                 }
             }

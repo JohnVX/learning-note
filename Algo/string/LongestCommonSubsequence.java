@@ -23,6 +23,7 @@ public class LongestCommonSubsequence {
                 }
                 out.println();
             }
+            StringBuilder sb = new StringBuilder();
             int i = lineX.length(), j = lineY.length();
             int prev = -1;
             while (i != 0 && j != 0){
@@ -32,26 +33,27 @@ public class LongestCommonSubsequence {
                     //lengthArr[i][j] == lengthArr[i-1][j-1] + 1
                     if(lineX.charAt(i-1) == lineY.charAt(j-1)){
                         if(lengthArr[i][j] != prev) {
-                            out.print(lineX.charAt(i - 1));
+                            sb.append(lineX.charAt(i - 1));
                             prev = lengthArr[i][j];
                         }
                         i--;j--;
                     }else if(lengthArr[i][j-1] == lengthArr[i][j]){
                         if (lengthArr[i][j] != prev)  {
-                            out.print(lineX.charAt(i - 1));
+                            sb.append(lineX.charAt(i - 1));
                             prev = lengthArr[i][j];
                         }
                         i--;
                     }else{
                         //lengthArr[i][j] == lengthArr[i-1][j]
                         if(lengthArr[i][j] != prev) {
-                            out.print(lineY.charAt(j - 1));
+                            sb.append(lineY.charAt(j - 1));
                             prev = lengthArr[i][j];
                         }
                         j--;
                     }
                 }
             }
+            out.println(sb.reverse());
         }
     }
     private static int[][] LCS(char[] X, char[] Y){

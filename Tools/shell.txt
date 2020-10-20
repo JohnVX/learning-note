@@ -18,6 +18,9 @@ iptables -nL --line-number
 ifconfig lo up
 ifconfig lo down
 
+#配置网卡的硬件地址
+ifconfig eth0 hw ether xx:xx:xx:xx:xx:xx
+
 生成 1 百万个 1KB 大小的文件
 seq 1000000 | xargs -i dd if=/dev/zero of={}.dat bs=1024 count=1
 

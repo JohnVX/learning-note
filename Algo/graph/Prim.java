@@ -8,6 +8,8 @@ import java.util.Objects;
  * 搜索最小生成树
  * 切分定理：
  * 在一幅连通加权无向图中，给定任意的切分，如有一条横切边的权值严格小于所有其他横切边，则这条边必然属于图的最小生成树
+ *
+ * shuwei: 此处给出的是图的邻接表存储简单实现, 使用更复杂的二叉堆甚至斐波那契堆数据结构, 能降低算法的时间复杂度
  */
 public class Prim {
     static class Vertex{
@@ -60,11 +62,19 @@ public class Prim {
         this.vertexList.add(v4);
         Vertex v5 = new Vertex("e");
         this.vertexList.add(v5);
+//        addEdge(v1, v2, 6);
+//        addEdge(v1, v3, 7);
+//        addEdge(v2, v5, 4);
+//        addEdge(v3, v4, 3);
+//        addEdge(v3, v5, 9);
+//        addEdge(v5, v4, 7);
+//        addEdge(v4, v2, 2);
+
         addEdge(v1, v2, 6);
         addEdge(v1, v3, 7);
         addEdge(v2, v5, 4);
         addEdge(v3, v4, 3);
-        addEdge(v3, v5, 9);
+        addEdge(v3, v5, 1);
         addEdge(v5, v4, 7);
         addEdge(v4, v2, 2);
     }

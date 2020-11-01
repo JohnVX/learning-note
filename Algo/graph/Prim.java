@@ -59,21 +59,21 @@ public class Prim {
         this.vertexList.add(v4);
         Vertex v5 = new Vertex("e");
         this.vertexList.add(v5);
-        addEdge(v1, v2, 6);
-        addEdge(v1, v3, 7);
-        addEdge(v2, v5, 4);
-        addEdge(v3, v4, 3);
-        addEdge(v3, v5, 9);
-        addEdge(v5, v4, 7);
-        addEdge(v4, v2, 2);
-
 //        addEdge(v1, v2, 6);
 //        addEdge(v1, v3, 7);
 //        addEdge(v2, v5, 4);
 //        addEdge(v3, v4, 3);
-//        addEdge(v3, v5, 1);
+//        addEdge(v3, v5, 9);
 //        addEdge(v5, v4, 7);
 //        addEdge(v4, v2, 2);
+
+        addEdge(v1, v2, 6);
+        addEdge(v1, v3, 7);
+        addEdge(v2, v5, 4);
+        addEdge(v3, v4, 3);
+        addEdge(v3, v5, 1);
+        addEdge(v5, v4, 7);
+        addEdge(v4, v2, 2);
     }
     public void primTree(){
         buildGraph();
@@ -84,18 +84,15 @@ public class Prim {
         for(int n = 0; n < vertexList.size() - 1; n++){
             Vertex tempVertex = new Vertex(start.key);
             Edge tempEdge = new Edge(start, start, Integer.MAX_VALUE);
-            label:
             for (Edge e : edgeList) {
-                for (Vertex v : newVertex) {
-                    if ((e.v1.equals(v) && !newVertex.contains(e.v2)) || (e.v2.equals(v) && !newVertex.contains(e.v1))) {
-                        if (!newVertex.contains(e.v2)) {
-                            tempVertex = e.v2;
-                        } else if (!newVertex.contains(e.v1)) {
-                            tempVertex = e.v1;
-                        }
-                        tempEdge = e;
-                        break label;
+                if ((newVertex.contains(e.v1) && !newVertex.contains(e.v2)) || (newVertex.contains(e.v2) && !newVertex.contains(e.v1))) {
+                    if (!newVertex.contains(e.v2)) {
+                        tempVertex = e.v2;
+                    } else if (!newVertex.contains(e.v1)) {
+                        tempVertex = e.v1;
                     }
+                    tempEdge = e;
+                    break;
                 }
             }
             edgeList.remove(tempEdge);
